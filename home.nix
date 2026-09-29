@@ -44,9 +44,12 @@
 
 	xdg.configFile."niri/config.kdl".source = ./niri/config.kdl;
 	xdg.configFile."kitty/kitty.conf".source = ./kitty/kitty.conf;
+	xdg.configFile."starship.toml".source = ./starship/starship.toml;
+	xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink "/etc/nixos/nvim";
 
 	home.packages = with pkgs; [
 		fuzzel
+		neovim
 		cliphist
 		firefox
 		discord

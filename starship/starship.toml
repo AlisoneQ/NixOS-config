@@ -1,0 +1,114 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = true
+
+format = """
+[╭─](dimmed)$os$username$directory$git_branch$git_status$cmd_duration
+[╰─](dimmed)$character"""
+
+right_format = """
+$python$nodejs$rust$golang$docker_context
+"""
+
+palette = "noctalia"
+
+[palettes.noctalia]
+text = "#cdd6f4"
+subtext = "#a6adc8"
+muted = "#6c7086"
+accent = "#89b4fa"
+accent2 = "#cba6f7"
+green = "#a6e3a1"
+yellow = "#f9e2af"
+red = "#f38ba8"
+surface = "#313244"
+
+# ─────────────────────────────────────────────────────
+# OS
+# ─────────────────────────────────────────────────────
+
+[os]
+disabled = false
+style = "fg:accent"
+format = "[$symbol]($style) "
+
+[os.symbols]
+NixOS = " "
+Linux = " "
+
+# ─────────────────────────────────────────────────────
+# User
+# ─────────────────────────────────────────────────────
+
+[username]
+show_always = true
+style_user = "fg:muted"
+style_root = "fg:red"
+format = "[$user]($style) "
+
+# ─────────────────────────────────────────────────────
+# Directory
+# ─────────────────────────────────────────────────────
+
+[directory]
+style = "fg:accent"
+format = "[$path]($style) "
+truncation_length = 4
+truncate_to_repo = true
+truncation_symbol = "…/"
+
+[git_branch]
+symbol = " "
+style = "fg:accent2"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "fg:yellow"
+format = "[$all_status$ahead_behind]($style) "
+
+# ─────────────────────────────────────────────────────
+# Programming environments
+# ─────────────────────────────────────────────────────
+
+[nodejs]
+symbol = " "
+style = "fg:green"
+format = "[$symbol$version]($style) "
+
+[python]
+symbol = " "
+style = "fg:yellow"
+format = "[$symbol$version]($style) "
+
+[rust]
+symbol = " "
+style = "fg:red"
+format = "[$symbol$version]($style) "
+
+[golang]
+symbol = " "
+style = "fg:accent"
+format = "[$symbol$version]($style) "
+
+[docker_context]
+symbol = " "
+style = "fg:accent2"
+format = "[$symbol$context]($style) "
+
+# ─────────────────────────────────────────────────────
+# Command timing
+# ─────────────────────────────────────────────────────
+
+[cmd_duration]
+min_time = 2000
+style = "fg:muted"
+format = "[󱎫 $duration]($style) "
+
+# ─────────────────────────────────────────────────────
+# Prompt
+# ─────────────────────────────────────────────────────
+
+[character]
+success_symbol = "[❯](bold fg:accent)"
+error_symbol = "[❯](bold fg:red)"
+vimcmd_symbol = "[❮](bold fg:accent2)"
