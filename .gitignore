@@ -1,0 +1,34 @@
+# Nix build outputs
+result
+result-*
+
+# Nix development/build directories
+.direnv/
+.devenv/
+
+# Home Manager / Nix generated files
+.hm/
+.nix-profile
+.nix-defexpr
+.nix-channels
+
+# Secrets / local machine-specific files
+*.secret
+*.secrets
+.env
+.env.*
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
