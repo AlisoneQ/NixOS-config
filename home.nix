@@ -27,16 +27,14 @@
     setAsDefaultBrowser = true;
   };
 
-/*
-    programs.vscode = {
+  programs.vscode = {
     enable = true;
     package = pkgs.vscode.overrideAttrs (old: {
       postFixup = (old.postFixup or "") + ''
         wrapProgram $out/bin/code --add-flags "--ozone-platform=wayland"
          '';
        });
-    };
-*/
+  };
 
   # Home Manager
   home.username = "alisoneq";
@@ -117,7 +115,6 @@
     firefox
     discord
     steam
-	vscodium
     pinta
 
     # CLI / Development
