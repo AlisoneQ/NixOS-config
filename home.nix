@@ -45,6 +45,30 @@
 
   programs.home-manager.enable = true;
 
+  home.pointerCursor = {
+    enable = true;
+    gtk.enable = true;
+	x11.enable = true;
+	package = pkgs.bibata-cursors;
+	name = "Bibata-Modern-Classic";
+	size = 18;
+  };
+
+  systemd.user.services.ydotoold = {
+    Unit = {
+      Description = "ydotool daemon";
+    };
+  
+    Service = {
+      ExecStart = "${pkgs.ydotool}/bin/ydotoold";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+  
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+  };
 
   # Configuration files
   xdg.configFile."niri/config.kdl".source =
@@ -55,19 +79,12 @@
     config.lib.file.mkOutOfStoreSymlink "/etc/nixos/nvim";
   xdg.configFile."fastfetch/config.jsonc".source = ./fastfetch/config.jsonc;
   xdg.configFile."fastfetch/logo.txt".source = ./fastfetch/logo.txt;
-  xdg.configFile."waybar/config.jsonc".source =
-    config.lib.file.mkOutOfStoreSymlink "/etc/nixos/waybar/config.jsonc";
-  xdg.configFile."waybar/style.css".source =
-    config.lib.file.mkOutOfStoreSymlink "/etc/nixos/waybar/style.css";
-  xdg.configFile."waybar/theme.css".source =
-    config.lib.file.mkOutOfStoreSymlink "/etc/nixos/waybar/theme.css";
-
 
   # Packages
   home.packages = with pkgs; [
     # Desktop / Wayland
     niri
-    waybar
+    quickshell
     fuzzel
     mako
     awww
@@ -86,6 +103,7 @@
     playerctl
     upower
     pavucontrol
+    ydotool
 
     # Terminal
     kitty
@@ -99,7 +117,7 @@
     firefox
     discord
     steam
-	  vscodium
+	vscodium
     pinta
 
     # CLI / Development

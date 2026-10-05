@@ -8,9 +8,10 @@
 
 
   # Boot
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
+  boot.loader = {
+  	limine.enable = true;
+  	efi.canTouchEfiVariables = true;
+  };
 
   # Networking
   networking.hostName = "fortepian";
@@ -55,6 +56,10 @@
     shell = pkgs.zsh;
   };
 
+  services.udev.extraRules = ''
+    KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
+  '';
+
 
   # Desktop
   programs.niri.enable = true;
@@ -78,7 +83,6 @@
   services.upower.enable = true;
 
   services.getty.autologinUser = "alisoneq";
-
 
   # Fonts
   fonts.packages = with pkgs; [

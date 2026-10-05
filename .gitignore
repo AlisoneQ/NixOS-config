@@ -1,34 +1,104 @@
-# Nix build outputs
+# ─────────────────────────────────────────────
+# NixOS / Nix
+# ─────────────────────────────────────────────
+
+# Machine-specific hardware configuration
+hardware-configuration.nix
+
+# Nix build results
 result
 result-*
 
-# Nix development/build directories
+# Nix development shell / temporary files
 .direnv/
 .devenv/
 
-# Home Manager / Nix generated files
-.hm/
-.nix-profile
-.nix-defexpr
-.nix-channels
+# ─────────────────────────────────────────────
+# Secrets / local configuration
+# ─────────────────────────────────────────────
 
-# Secrets / local machine-specific files
-*.secret
-*.secrets
+# Environment files
 .env
 .env.*
+!.env.example
 
+# Local secrets
+secrets/
+*.secret
+*.key
+*.pem
+
+# ─────────────────────────────────────────────
 # Editor / IDE
+# ─────────────────────────────────────────────
+
+# VS Code
 .vscode/
+
+# JetBrains
 .idea/
+
+# Vim / Neovim
 *.swp
 *.swo
-*~
+*.swn
+*.un~
+Session.vim
+.netrwhist
 
-# OS junk
+# ─────────────────────────────────────────────
+# OS
+# ─────────────────────────────────────────────
+
+# macOS
 .DS_Store
-Thumbs.db
+.AppleDouble
+.LSOverride
 
-# Temporary files
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Linux
+*~
+.directory
+
+# ─────────────────────────────────────────────
+# Temporary / generated files
+# ─────────────────────────────────────────────
+
 *.tmp
+*.temp
+*.log
 *.bak
+*.orig
+*.rej
+
+# ─────────────────────────────────────────────
+# Node / JavaScript
+# ─────────────────────────────────────────────
+
+node_modules/
+.npm/
+.yarn/
+.pnpm-store/
+dist/
+build/
+coverage/
+
+# ─────────────────────────────────────────────
+# Python
+# ─────────────────────────────────────────────
+
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ─────────────────────────────────────────────
+# Quickshell / desktop-generated files
+# ─────────────────────────────────────────────
+
+# Add specific generated Quickshell files here if/when needed.
+# Do NOT ignore the actual QML configuration.
