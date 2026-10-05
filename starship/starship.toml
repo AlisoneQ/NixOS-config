@@ -10,9 +10,9 @@ right_format = """
 $python$nodejs$rust$golang$docker_context
 """
 
-palette = "noctalia"
+palette = "main"
 
-[palettes.noctalia]
+[palettes.main]
 text = "#cdd6f4"
 subtext = "#a6adc8"
 muted = "#6c7086"

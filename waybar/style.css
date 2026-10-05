@@ -1,0 +1,246 @@
+@import "theme.css";
+
+/* ╭──────────────────────────────────────────────╮
+   │                  GLOBAL                      │
+   ╰──────────────────────────────────────────────╯ */
+
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 15px;
+    font-weight: normal;
+
+    color: @foreground;
+
+    border: none;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+window#waybar {
+    background: transparent;
+}
+
+
+/* ╭──────────────────────────────────────────────╮
+   │               COMMON MODULE                 │
+   ╰──────────────────────────────────────────────╯ */
+
+#niri-window,
+#group-performance,
+#mpris,
+#niri-workspaces,
+#clock,
+#group-utilities,
+#tray,
+#custom-notifications,
+#network,
+#battery {
+
+    background: @background;
+
+    border: 1px solid @border;
+    border-radius: 10px;
+
+    padding: 4px 10px;
+    margin: 2px 2px;
+}
+
+
+/* ╭──────────────────────────────────────────────╮
+   │             WINDOW TITLE                     │
+   ╰──────────────────────────────────────────────╯ */
+
+#niri-window {
+    color: @foreground;
+}
+
+
+/* ╭──────────────────────────────────────────────╮
+   │               PERFORMANCE                    │
+   ╰──────────────────────────────────────────────╯ */
+
+#group-performance {
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+#cpu,
+#memory,
+#temperature {
+    padding: 0 5px;
+}
+
+#cpu {
+    color: @accent;
+}
+
+#memory {
+    color: @accent-alt;
+}
+
+#temperature {
+    color: @warning;
+}
+
+
+/* ╭──────────────────────────────────────────────╮
+   │                  MUSIC                       │
+   ╰──────────────────────────────────────────────╯ */
+
+#mpris {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+#mpris.paused {
+    color: @foreground-muted;
+}
+
+
+/* ╭──────────────────────────────────────────────╮
+   │                WORKSPACES                    │
+   ╰──────────────────────────────────────────────╯ */
+
+#niri-workspaces {
+    padding: 3px 5px;
+}
+
+#niri-workspaces button {
+    color: @foreground-muted;
+
+    background: transparent;
+
+    border-radius: 7px;
+
+    padding: 2px 7px;
+    margin: 0 1px;
+
+    transition:
+        background 150ms ease,
+        color 150ms ease;
+}
+
+#niri-workspaces button:hover {
+    color: @foreground;
+    background: @hover;
+}
+
+#niri-workspaces button.active {
+    color: @foreground;
+    background: @active;
+}
+
+#niri-workspaces button.urgent {
+    color: @critical;
+}
+
+
+/* ╭──────────────────────────────────────────────╮
+   │                   CLOCK                      │
+   ╰──────────────────────────────────────────────╯ */
+
+#clock {
+    color: @foreground;
+    font-weight: bold;
+}
+
+
+/* ╭──────────────────────────────────────────────╮
+   │                 UTILITIES                    │
+   ╰──────────────────────────────────────────────╯ */
+
+#group-utilities {
+    padding: 3px 5px;
+}
+
+#custom-screenshot,
+#custom-colorpicker,
+#custom-performance {
+    padding: 0 7px;
+    color: @foreground-muted;
+}
+
+#custom-screenshot:hover,
+#custom-colorpicker:hover,
+#custom-performance:hover {
+    color: @foreground;
+    background: @hover;
+}
+
+
+/* ╭──────────────────────────────────────────────╮
+   │                  TRAY                        │
+   ╰──────────────────────────────────────────────╯ */
+
+#tray {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+#tray > .passive {
+    opacity: 0.7;
+}
+
+
+/* ╭──────────────────────────────────────────────╮
+   │              NOTIFICATIONS                   │
+   ╰──────────────────────────────────────────────╯ */
+
+#custom-notifications {
+    color: @foreground-muted;
+}
+
+#custom-notifications:hover {
+    color: @foreground;
+    background: @hover;
+}
+
+
+/* ╭──────────────────────────────────────────────╮
+   │                 NETWORK                      │
+   ╰──────────────────────────────────────────────╯ */
+
+#network {
+    color: @foreground;
+}
+
+#network.disconnected {
+    color: @critical;
+}
+
+
+/* ╭──────────────────────────────────────────────╮
+   │                 BATTERY                      │
+   ╰──────────────────────────────────────────────╯ */
+
+#battery {
+    color: @foreground;
+}
+
+#battery.charging {
+    color: @success;
+}
+
+#battery.warning {
+    color: @warning;
+}
+
+#battery.critical {
+    color: @critical;
+}
+
+
+/* ╭──────────────────────────────────────────────╮
+   │                 TOOLTIPS                     │
+   ╰──────────────────────────────────────────────╯ */
+
+tooltip {
+    background: @background-alt;
+    border: 1px solid @border;
+    border-radius: 8px;
+}
+
+tooltip label {
+    color: @foreground;
+    padding: 4px;
+}

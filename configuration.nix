@@ -1,18 +1,23 @@
 { config, pkgs, ... }:
 
 {
-  imports =
-    [
-      ./hardware-configuration.nix
-    ];
+  # Imports
+  imports = [
+    ./hardware-configuration.nix
+  ];
 
+
+  # Boot
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "fortepian";
 
+  # Networking
+  networking.hostName = "fortepian";
   networking.networkmanager.enable = true;
 
+
+  # Localization
   time.timeZone = "Europe/Warsaw";
 
   i18n.defaultLocale = "en_US.UTF-8";
@@ -36,49 +41,61 @@
 
   console.keyMap = "pl2";
 
+
+  # User
   users.users.alisoneq = {
     isNormalUser = true;
     description = "AlisoneQ";
-    extraGroups = [ "networkmanager" "wheel" "video" "input" ];
-    packages = with pkgs; [];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "video"
+      "input"
+    ];
+    shell = pkgs.zsh;
   };
 
-  nixpkgs.config.allowUnfree = true;
 
-  environment.systemPackages = with pkgs; [
-    wget
-    wl-clipboard
-    grim
-    slurp
-    niri
-    kitty
-    brightnessctl
-    playerctl
-    git
-    htop	
-  ];
-
+  # Desktop
   programs.niri.enable = true;
 
-	programs.zsh.enable = true;
-	users.users.alisoneq.shell = pkgs.zsh;
 
+  # Shell
+  programs.zsh.enable = true;
+
+
+  # Audio
   security.rtkit.enable = true;
+
   services.pipewire = {
     enable = true;
     alsa.enable = true;
     pulse.enable = true;
   };
 
+
+  # Services
+  services.upower.enable = true;
+
+  services.getty.autologinUser = "alisoneq";
+
+
+  # Fonts
   fonts.packages = with pkgs; [
     noto-fonts
     nerd-fonts.jetbrains-mono
   ];
-  
-  services.getty.autologinUser = "alisoneq";
 
+
+  # Nix
+  nixpkgs.config.allowUnfree = true;
+
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+
+
+  # System
   system.stateVersion = "25.11";
-
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  
 }
