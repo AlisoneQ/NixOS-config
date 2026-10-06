@@ -11,12 +11,14 @@ Rectangle {
     required property int resultIndex
     property bool selected: LauncherState.selectedIndex === resultIndex
     property bool clipboardEntry: entry.kind === "clipboard"
+    property bool hovered: resultMouse.containsMouse
 
-    height: 52
-    radius: 8
-    color: selected ? Qt.alpha(Theme.colAccent, 0.22) : "transparent"
+    height: 54
+    radius: 11
+    color: selected ? Qt.alpha(Theme.colAccent, 0.18) :
+                      (hovered ? Qt.alpha(Theme.colBorder, 0.34) : "transparent")
     border.width: selected ? 1 : 0
-    border.color: Qt.alpha(Theme.colAccent, 0.65)
+    border.color: Qt.alpha(Theme.colAccent, 0.58)
 
     Behavior on color {
         ColorAnimation { duration: Theme.motionFast }
@@ -24,9 +26,17 @@ Rectangle {
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 12
-        anchors.rightMargin: 12
-        spacing: 10
+        anchors.leftMargin: 14
+        anchors.rightMargin: 14
+        spacing: 11
+
+        Rectangle {
+            Layout.preferredWidth: 2
+            Layout.preferredHeight: 22
+            radius: 1
+            color: Theme.colAccent
+            visible: resultRow.selected
+        }
 
         IconImage {
             visible: !resultRow.clipboardEntry
@@ -71,13 +81,14 @@ Rectangle {
 
         Text {
             text: resultRow.selected ? (resultRow.clipboardEntry ? "Copy" : "Open") : ""
-            color: Theme.colMuted
+            color: resultRow.selected ? Theme.colAccent : Theme.colMuted
             font.family: Theme.fontFamily
             font.pixelSize: Theme.fontSize - 2
         }
     }
 
     MouseArea {
+        id: resultMouse
         anchors.fill: parent
         hoverEnabled: true
         onEntered: LauncherState.selectedIndex = resultRow.resultIndex
