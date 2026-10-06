@@ -15,12 +15,17 @@ Item {
     property int resultLimit: 12
 
     readonly property string appPrefix: ">"
-    readonly property string mode: query.startsWith(appPrefix) ? "apps" : "apps"
-    readonly property string searchText: query.startsWith(appPrefix) ? query.slice(appPrefix.length).trim() : query.trim()
+    readonly property string clipboardPrefix: ";"
+    readonly property bool clipboardMode: query.startsWith(clipboardPrefix)
+    readonly property string mode: clipboardMode ? "clipboard" : "apps"
+    readonly property string searchText: clipboardMode ? query.slice(clipboardPrefix.length).trim() :
+                                      (query.startsWith(appPrefix) ? query.slice(appPrefix.length).trim() : query.trim())
     readonly property var applications: Array.from(DesktopEntries.applications.values)
         .filter(entry => entry && entry.name)
         .sort((left, right) => left.name.localeCompare(right.name))
-    readonly property var results: matchingApplications(searchText).slice(0, resultLimit)
+    property var clipboardEntries: []
+    readonly property var results: (clipboardMode ? matchingClipboard(searchText) : matchingApplications(searchText))
+        .slice(0, resultLimit)
 
     onQueryChanged: selectedIndex = 0
     onResultsChanged: {
@@ -66,6 +71,24 @@ Item {
         return ranked.map(result => result.entry)
     }
 
+    function cleanClipboardEntry(entry) {
+        return entry.replace(/^\d+\t/, "")
+    }
+
+    function matchingClipboard(text) {
+        const ranked = clipboardEntries.map(entry => ({
+            entry: entry,
+            score: scoreMatch(text, cleanClipboardEntry(entry))
+        })).filter(result => result.score >= 0)
+
+        ranked.sort((left, right) => right.score - left.score)
+        return ranked.map(result => ({
+            kind: "clipboard",
+            name: cleanClipboardEntry(result.entry),
+            rawEntry: result.entry
+        }))
+    }
+
     function moveSelection(delta) {
         if (results.length === 0) return
         selectedIndex = (selectedIndex + delta + results.length) % results.length
@@ -75,11 +98,21 @@ Item {
         const entry = results[selectedIndex]
         if (!entry) return
         close()
-        entry.execute()
+        if (entry.kind === "clipboard") copyClipboard(entry.rawEntry)
+        else entry.execute()
     }
 
     function openLauncher() {
-        query = ""
+        openWithQuery("")
+    }
+
+    function openClipboard() {
+        refreshClipboard()
+        openWithQuery(clipboardPrefix)
+    }
+
+    function openWithQuery(initialQuery) {
+        query = initialQuery
         selectedIndex = 0
         focusOutputProcess.running = true
     }
@@ -93,6 +126,15 @@ Item {
         open = false
         query = ""
         selectedIndex = 0
+    }
+
+    function refreshClipboard() {
+        clipboardReadProcess.running = true
+    }
+
+    function copyClipboard(entry) {
+        const escapedEntry = String(entry).replace(/'/g, "'\\''")
+        Quickshell.execDetached(["sh", "-c", "printf '%s\\n' '" + escapedEntry + "' | cliphist decode | wl-copy"])
     }
 
     Process {
@@ -120,11 +162,34 @@ Item {
         }
     }
 
+    Process {
+        id: clipboardReadProcess
+        command: ["cliphist", "list"]
+        property var buffer: []
+
+        stdout: SplitParser {
+            onRead: line => clipboardReadProcess.buffer.push(line)
+        }
+
+        onRunningChanged: {
+            if (running) {
+                buffer = []
+                return
+            }
+            clipboardEntries = buffer
+        }
+    }
+
     IpcHandler {
         target: "launcher"
 
         function toggle() { state.toggle() }
         function open() { if (!state.open) state.openLauncher() }
         function close() { state.close() }
+        function clipboardToggle() {
+            if (state.open && state.clipboardMode) state.close()
+            else state.openClipboard()
+        }
+        function clipboardOpen() { state.openClipboard() }
     }
 }

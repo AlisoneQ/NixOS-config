@@ -68,6 +68,34 @@
     };
   };
 
+  systemd.user.services.cliphist-text = {
+    Unit = {
+      Description = "Store text clipboard history with cliphist";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --type text --watch ${pkgs.cliphist}/bin/cliphist store";
+      Restart = "always";
+      RestartSec = 2;
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
+
+  systemd.user.services.cliphist-image = {
+    Unit = {
+      Description = "Store image clipboard history with cliphist";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --type image --watch ${pkgs.cliphist}/bin/cliphist store";
+      Restart = "always";
+      RestartSec = 2;
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
+
   # Configuration files
   xdg.configFile."niri/config.kdl".source =
     config.lib.file.mkOutOfStoreSymlink "/etc/nixos/niri/config.kdl";
