@@ -4,6 +4,7 @@
   # Imports
   imports = [
     inputs.zen-browser.homeModules.beta
+    inputs.nix-flatpak.homeManagerModules.nix-flatpak
   ];
 
 
@@ -130,6 +131,7 @@
     upower
     pavucontrol
     ydotool
+    flatpak
 
     # Terminal
     kitty
@@ -149,6 +151,14 @@
     git
     wget
     nodejs
-	codex
+	  codex
   ];
+  
+  services.flatpak = {
+    enable = true;
+
+    packages = [
+      "org.vinegarhq.Sober"
+    ];
+  };
 }
