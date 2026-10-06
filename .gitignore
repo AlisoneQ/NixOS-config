@@ -2,9 +2,6 @@
 # NixOS / Nix
 # ─────────────────────────────────────────────
 
-# Machine-specific hardware configuration
-hardware-configuration.nix
-
 # Nix build results
 result
 result-*
