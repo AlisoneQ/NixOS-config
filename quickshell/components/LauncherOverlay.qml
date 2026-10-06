@@ -75,7 +75,7 @@ PanelWindow {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 40
                 focus: true
-                placeholderText: "Search applications"
+                placeholderText: LauncherState.clipboardMode ? "Search clipboard history" : "Search applications"
                 text: LauncherState.query
                 color: Theme.colFg
                 font.family: Theme.fontFamily
@@ -111,7 +111,7 @@ PanelWindow {
             Text {
                 Layout.fillWidth: true
                 visible: LauncherState.results.length === 0
-                text: "No applications found"
+                text: LauncherState.clipboardMode ? "No clipboard entries found" : "No applications found"
                 color: Theme.colMuted
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
@@ -147,7 +147,7 @@ PanelWindow {
 
             Text {
                 Layout.fillWidth: true
-                text: "↑/↓ select   Enter open   Esc close"
+                text: LauncherState.clipboardMode ? "↑/↓ select   Enter copy   Esc close" : "↑/↓ select   Enter open   Esc close"
                 color: Theme.colMuted
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize - 2

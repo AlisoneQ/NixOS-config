@@ -10,6 +10,7 @@ Rectangle {
     required property var entry
     required property int resultIndex
     property bool selected: LauncherState.selectedIndex === resultIndex
+    property bool clipboardEntry: entry.kind === "clipboard"
 
     height: 52
     radius: 8
@@ -28,9 +29,20 @@ Rectangle {
         spacing: 10
 
         IconImage {
+            visible: !resultRow.clipboardEntry
             source: Quickshell.iconPath(resultRow.entry.icon || "application-x-executable")
             Layout.preferredWidth: 28
             Layout.preferredHeight: 28
+        }
+
+        Text {
+            visible: resultRow.clipboardEntry
+            text: "⧉"
+            color: Theme.colAccent
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontSize + 8
+            Layout.preferredWidth: 28
+            horizontalAlignment: Text.AlignHCenter
         }
 
         ColumnLayout {
@@ -49,7 +61,7 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 visible: text !== ""
-                text: resultRow.entry.genericName || resultRow.entry.comment || ""
+                text: resultRow.clipboardEntry ? "Clipboard" : (resultRow.entry.genericName || resultRow.entry.comment || "")
                 color: Theme.colMuted
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize - 2
@@ -58,7 +70,7 @@ Rectangle {
         }
 
         Text {
-            text: resultRow.selected ? "Enter" : ""
+            text: resultRow.selected ? (resultRow.clipboardEntry ? "Copy" : "Open") : ""
             color: Theme.colMuted
             font.family: Theme.fontFamily
             font.pixelSize: Theme.fontSize - 2
