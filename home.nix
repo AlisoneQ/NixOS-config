@@ -120,5 +120,7 @@
     # CLI / Development
     git
     wget
+    nodejs
+	codex
   ];
 }

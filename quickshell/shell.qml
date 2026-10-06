@@ -12,6 +12,16 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
 
+        LauncherOverlay {
+            property var modelData
+            screen: modelData
+            outputName: modelData.name
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+
         PanelWindow {
             id: barWindow
             property var modelData
