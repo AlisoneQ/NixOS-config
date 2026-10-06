@@ -7,7 +7,7 @@ Text {
     color: Theme.colClock
     font.pixelSize: Theme.fontSize
     font.family: Theme.fontFamily
-    font.bold: true
+    font.weight: Font.DemiBold
     renderType: Text.NativeRendering
     horizontalAlignment: Text.AlignHCenter
     verticalAlignment: Text.AlignVCenter

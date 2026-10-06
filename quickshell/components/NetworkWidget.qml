@@ -5,8 +5,8 @@ import ".."
 Item {
     id: networkWidget
 
-    implicitWidth: 24
-    implicitHeight: 24
+    implicitWidth: 28
+    implicitHeight: 28
 
     property string connectionKind: "offline"
     property string connectionName: ""
@@ -80,12 +80,22 @@ Item {
         }
     }
 
+    Rectangle {
+        anchors.fill: parent
+        radius: 8
+        color: networkMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.5) : "transparent"
+        border.width: networkMouse.containsMouse ? 1 : 0
+        border.color: Qt.alpha(Theme.colBorder, 0.7)
+
+        Behavior on color { ColorAnimation { duration: Theme.motionFast } }
+    }
+
     Text {
         id: networkIcon
         anchors.centerIn: parent
         text: networkWidget.iconName
         font.family: materialSymbolsFont.name || Theme.iconFontFamily
-        font.pixelSize: 19
+        font.pixelSize: 18
         font.weight: Font.Normal
         color: Theme.colFg
         horizontalAlignment: Text.AlignHCenter

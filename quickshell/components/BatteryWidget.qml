@@ -6,8 +6,8 @@ Item {
     id: batteryWidget
     visible: hasBattery
 
-    implicitWidth: 24
-    implicitHeight: 24
+    implicitWidth: 28
+    implicitHeight: 28
 
     property int batteryLevel: 0
     property bool charging: false
@@ -80,12 +80,22 @@ Item {
         }
     }
 
+    Rectangle {
+        anchors.fill: parent
+        radius: 8
+        color: batteryMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.5) : "transparent"
+        border.width: batteryMouse.containsMouse ? 1 : 0
+        border.color: Qt.alpha(Theme.colBorder, 0.7)
+
+        Behavior on color { ColorAnimation { duration: Theme.motionFast } }
+    }
+
     Text {
         id: batteryIcon
         anchors.centerIn: parent
         text: batteryWidget.iconName
         font.family: materialSymbolsFont.name || Theme.iconFontFamily
-        font.pixelSize: 19
+        font.pixelSize: 18
         font.weight: Font.Normal
         color: Theme.colFg
         visible: batteryWidget.hasBattery

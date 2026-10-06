@@ -7,8 +7,8 @@ import ".."
 
 RowLayout {
     id: workspaceBar
-    spacing: 4
-    implicitWidth: workspaces.length * 32 + Math.max(0, workspaces.length - 1) * spacing
+    spacing: 3
+    implicitWidth: workspaces.length * 28 + Math.max(0, workspaces.length - 1) * spacing
     implicitHeight: 28
 
     required property string outputName
@@ -72,18 +72,19 @@ RowLayout {
                 if (desktopIconName === "") displayedIconName = ""
             }
 
-            Layout.preferredWidth: 32
-            Layout.preferredHeight: 28
-            Layout.minimumWidth: 32
-            Layout.maximumWidth: 32
-            Layout.minimumHeight: 28
-            Layout.maximumHeight: 28
+            Layout.preferredWidth: 28
+            Layout.preferredHeight: 26
+            Layout.minimumWidth: 28
+            Layout.maximumWidth: 28
+            Layout.minimumHeight: 26
+            Layout.maximumHeight: 26
             Layout.alignment: Qt.AlignVCenter
-            radius: 9
-            scale: workspaceMouse.containsMouse ? 1.06 : 1.0
-            color: isActive ? Theme.colAccent : (workspaceMouse.containsMouse ? Theme.colBorder : "transparent")
+            radius: 8
+            scale: workspaceMouse.containsMouse ? 1.035 : 1.0
+            color: isActive ? Qt.alpha(Theme.colAccent, 0.2) :
+                              (workspaceMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.52) : "transparent")
             border.width: isActive || isUrgent ? 1 : 0
-            border.color: isUrgent ? Theme.colDanger : Theme.colAccent
+            border.color: isUrgent ? Theme.colDanger : Qt.alpha(Theme.colAccent, 0.7)
 
             Behavior on color {
                 ColorAnimation { duration: Theme.motionFast }
@@ -99,8 +100,8 @@ RowLayout {
             Text {
                 anchors.centerIn: parent
                 text: "•"
-                color: parent.isActive ? Theme.colBg : Theme.colMuted
-                font.pixelSize: 11
+                color: parent.isActive ? Theme.colAccent : Qt.alpha(Theme.colMuted, 0.7)
+                font.pixelSize: 9
                 visible: parent.displayedIconName === ""
             }
 
@@ -119,11 +120,26 @@ RowLayout {
             IconImage {
                 id: appIcon
                 anchors.centerIn: parent
-                width: 18
-                height: 18
+                width: 16
+                height: 16
                 source: parent.displayedIconName ? Quickshell.iconPath(parent.displayedIconName) : ""
                 visible: parent.displayedIconName !== ""
-                opacity: 1
+                opacity: parent.isActive ? 1 : 0.78
+            }
+
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 3
+                width: parent.isActive ? 10 : 0
+                height: 2
+                radius: 1
+                color: Theme.colAccent
+                visible: parent.isActive
+
+                Behavior on width {
+                    NumberAnimation { duration: Theme.motionFast; easing.type: Easing.OutCubic }
+                }
             }
 
             MouseArea {

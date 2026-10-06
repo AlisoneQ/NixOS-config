@@ -35,9 +35,14 @@ PanelWindow {
         onTriggered: searchInput.forceActiveFocus()
     }
 
+    FontLoader {
+        id: materialSymbolsFont
+        source: "/etc/nixos/fonts/MaterialSymbolsRounded.ttf"
+    }
+
     Rectangle {
         anchors.fill: parent
-        color: Qt.rgba(0, 0, 0, 0.32)
+        color: Qt.rgba(0, 0, 0, 0.38)
 
         MouseArea {
             anchors.fill: parent
@@ -47,15 +52,24 @@ PanelWindow {
 
     Rectangle {
         id: launcherCard
-        width: Math.min(620, parent.width - 40)
-        height: Math.min(640, Math.max(94, contentLayout.implicitHeight + 20))
+        width: Math.min(600, parent.width - 40)
+        height: Math.min(626, Math.max(98, contentLayout.implicitHeight + 24))
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: Math.max(70, parent.height * 0.16)
-        radius: 12
-        color: Theme.colBg
+        anchors.topMargin: Math.max(64, parent.height * 0.14)
+        radius: 18
+        color: Qt.alpha(Theme.colBg, 0.98)
         border.width: 1
-        border.color: Theme.colBorder
+        border.color: Qt.alpha(Theme.colBorder, 0.8)
+
+        Rectangle {
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: 72
+            height: 2
+            radius: 1
+            color: Qt.alpha(Theme.colAccent, 0.7)
+        }
 
         Keys.onPressed: event => {
             if (event.key === Qt.Key_Escape) {
@@ -67,45 +81,66 @@ PanelWindow {
         ColumnLayout {
             id: contentLayout
             anchors.fill: parent
-            anchors.margins: 10
-            spacing: 8
+            anchors.margins: 12
+            spacing: 6
 
-            TextField {
-                id: searchInput
+            Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 40
-                focus: true
-                placeholderText: LauncherState.clipboardMode ? "Search clipboard history" : "Search applications"
-                text: LauncherState.query
-                color: Theme.colFg
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize
-                selectionColor: Theme.colAccent
-                selectedTextColor: Theme.colBg
+                Layout.preferredHeight: 46
+                radius: 12
+                color: Qt.alpha(Theme.colTooltip, 0.82)
+                border.width: 1
+                border.color: searchInput.activeFocus ? Qt.alpha(Theme.colAccent, 0.85) : Qt.alpha(Theme.colBorder, 0.8)
 
-                background: Rectangle {
-                    radius: 8
-                    color: Theme.colTooltip
-                    border.width: 1
-                    border.color: searchInput.activeFocus ? Theme.colAccent : Theme.colBorder
+                Behavior on border.color { ColorAnimation { duration: Theme.motionFast } }
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 13
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: LauncherState.clipboardMode ? "content_paste_search" : "search"
+                    color: searchInput.activeFocus ? Theme.colAccent : Theme.colMuted
+                    font.family: materialSymbolsFont.name || Theme.iconFontFamily
+                    font.pixelSize: 19
+
+                    Behavior on color { ColorAnimation { duration: Theme.motionFast } }
                 }
 
-                onTextEdited: LauncherState.query = text
+                TextField {
+                    id: searchInput
+                    anchors.left: parent.left
+                    anchors.leftMargin: 43
+                    anchors.right: parent.right
+                    anchors.rightMargin: 12
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: parent.height
+                    focus: true
+                    placeholderText: LauncherState.clipboardMode ? "Search clipboard history" : "Search applications"
+                    text: LauncherState.query
+                    color: Theme.colFg
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize
+                    selectionColor: Theme.colAccent
+                    selectedTextColor: Theme.colBg
+                    background: Item {}
 
-                Keys.onPressed: event => {
-                    if (event.key === Qt.Key_Escape) {
-                        LauncherState.close()
-                        event.accepted = true
-                    } else if (event.key === Qt.Key_Down) {
-                        LauncherState.moveSelection(1)
-                        event.accepted = true
-                    } else if (event.key === Qt.Key_Up) {
-                        LauncherState.moveSelection(-1)
-                        event.accepted = true
+                    onTextEdited: LauncherState.query = text
+
+                    Keys.onPressed: event => {
+                        if (event.key === Qt.Key_Escape) {
+                            LauncherState.close()
+                            event.accepted = true
+                        } else if (event.key === Qt.Key_Down) {
+                            LauncherState.moveSelection(1)
+                            event.accepted = true
+                        } else if (event.key === Qt.Key_Up) {
+                            LauncherState.moveSelection(-1)
+                            event.accepted = true
+                        }
                     }
-                }
 
-                onAccepted: LauncherState.activateSelected()
+                    onAccepted: LauncherState.activateSelected()
+                }
             }
 
             Text {
@@ -116,8 +151,8 @@ PanelWindow {
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
                 horizontalAlignment: Text.AlignHCenter
-                topPadding: 12
-                bottomPadding: 12
+                topPadding: 16
+                bottomPadding: 16
             }
 
             ListView {
@@ -126,7 +161,7 @@ PanelWindow {
                 Layout.preferredHeight: Math.min(contentHeight, 520)
                 visible: LauncherState.results.length > 0
                 clip: true
-                spacing: 4
+                spacing: 3
                 model: LauncherState.results
 
                 delegate: LauncherResult {
