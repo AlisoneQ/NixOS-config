@@ -11,8 +11,8 @@ Rectangle {
 
     width: tooltipText.implicitWidth + 20
     height: tooltipText.implicitHeight + 12
-    radius: 7
-    color: Theme.colTooltip
+    radius: Theme.radiusSmall
+    color: Theme.colSurfaceRaised
     border.width: 1
     border.color: Theme.colBorder
     opacity: shown ? 1 : 0

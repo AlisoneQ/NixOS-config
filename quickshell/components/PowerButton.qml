@@ -9,8 +9,8 @@ Item {
 
     id: powerButton
 
-    implicitWidth: 28
-    implicitHeight: 28
+    implicitWidth: Theme.controlSize
+    implicitHeight: Theme.controlSize
 
     FontLoader {
         id: materialSymbolsFont
@@ -30,8 +30,8 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: 8
-        color: powerMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.5) : "transparent"
+        radius: Theme.radiusSmall
+        color: powerMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.46) : Qt.alpha(Theme.colSurfaceRaised, 0.18)
         border.width: powerMouse.containsMouse ? 1 : 0
         border.color: Qt.alpha(Theme.colBorder, 0.7)
 

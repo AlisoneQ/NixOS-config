@@ -79,7 +79,7 @@ ShellRoot {
                 + fixedWidth
 
             color: "transparent"
-            exclusiveZone: 32
+            exclusiveZone: Theme.islandHeight
 
             margins {
                 top: 0
@@ -104,22 +104,22 @@ ShellRoot {
                 y: bar.entered ? 0 : -5
 
                 width: Math.min(parent.width, barWindow.mode === "bar" ? contentWidth : barWindow.showHistory ? 520 : barWindow.showAudioPanel ? 370 : 460)
-                height: barWindow.showHistory ? Math.min(barWindow.height - 24, 520) :
+                height: barWindow.showHistory ? Math.min(barWindow.height - Theme.space4 * 2, 520) :
                         barWindow.showPreview ? Math.min(barWindow.height - 24, Math.max(114, previewContent.implicitHeight + 12)) :
-                        barWindow.showAudioPanel ? 212 : 42
+                        barWindow.showAudioPanel ? 212 : Theme.islandHeight
                 clip: true
 
                 topLeftRadius: 0
                 topRightRadius: 0
-                bottomLeftRadius: barWindow.mode === "bar" ? 13 : 18
+                bottomLeftRadius: barWindow.mode === "bar" ? Theme.radiusMedium : Theme.radiusLarge
                 bottomRightRadius: bottomLeftRadius
                 Behavior on height { NumberAnimation { duration: Theme.motionSlow; easing.type: Easing.OutCubic } }
                 Behavior on bottomLeftRadius { NumberAnimation { duration: Theme.motionSlow; easing.type: Easing.OutCubic } }
 
-                color: Qt.alpha(Theme.colBg, 0.94)
+                color: Qt.alpha(Theme.colSurface, Theme.surfaceOpacity)
 
-                border.width: 0
-                border.color: Qt.alpha(Theme.colBorder, 0.62)
+                border.width: 1
+                border.color: Qt.alpha(Theme.colBorder, 0.84)
 
                 opacity: bar.entered ? 1 : 0
 
@@ -150,25 +150,29 @@ ShellRoot {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
 
-                    width: Math.min(96, parent.width * 0.28)
+                    width: Math.min(88, parent.width * 0.24)
                     height: 1
 
                     color: Qt.alpha(Theme.colAccent, 0.58)
+
+                    Behavior on width { NumberAnimation { duration: Theme.motionMedium; easing.type: Easing.OutCubic } }
                 }
 
                 Item {
                     id: normalContent
                     width: bar.width
-                    height: 42
+                    height: Theme.islandHeight
                     opacity: barWindow.showHistory || barWindow.showPreview ? 0 : 1
+                    y: barWindow.showHistory || barWindow.showPreview ? -4 : 0
                     visible: opacity > 0
                     enabled: !barWindow.showHistory && !barWindow.showPreview
                     Behavior on opacity { NumberAnimation { duration: Theme.motionFast } }
+                    Behavior on y { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
                 WorkspaceBar {
                     id: workspaceBar
 
                     anchors.left: parent.left
-                    anchors.leftMargin: 12
+                    anchors.leftMargin: Theme.space3
                     anchors.verticalCenter: parent.verticalCenter
 
                     outputName: modelData.name
@@ -181,8 +185,10 @@ ShellRoot {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
 
-                    radius: 9
-                    color: Qt.alpha(Theme.colTooltip, 0.50)
+                    radius: Theme.radiusSmall
+                    color: Qt.alpha(Theme.colSurfaceRaised, 0.78)
+                    border.width: 1
+                    border.color: Qt.alpha(Theme.colBorder, 0.62)
 
                     Clock {
                         anchors.centerIn: parent
@@ -190,10 +196,10 @@ ShellRoot {
                 }
                 Row {
                     anchors.right: parent.right
-                    anchors.rightMargin: 12
+                    anchors.rightMargin: Theme.space3
                     anchors.verticalCenter: parent.verticalCenter
 
-                    spacing: 6
+                    spacing: Theme.space1
 
                     BatteryWidget {
                         id: batteryWidget
@@ -224,11 +230,11 @@ ShellRoot {
                     id: audioPanel
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
-                    anchors.topMargin: 48
+                    anchors.topMargin: Theme.islandHeight + Theme.space1
                     visible: barWindow.showAudioPanel
                     enabled: visible
                     opacity: visible ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: Theme.motionFast } }
+                    Behavior on opacity { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
                 }
                 }
 

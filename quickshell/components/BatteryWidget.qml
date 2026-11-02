@@ -6,8 +6,8 @@ Item {
     id: batteryWidget
     visible: hasBattery
 
-    implicitWidth: 28
-    implicitHeight: 28
+    implicitWidth: Theme.controlSize
+    implicitHeight: Theme.controlSize
 
     property int batteryLevel: 0
     property bool charging: false
@@ -86,8 +86,8 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: 8
-        color: batteryMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.5) : "transparent"
+        radius: Theme.radiusSmall
+        color: batteryMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.46) : Qt.alpha(Theme.colSurfaceRaised, 0.18)
         border.width: batteryMouse.containsMouse ? 1 : 0
         border.color: Qt.alpha(Theme.colBorder, 0.7)
 

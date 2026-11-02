@@ -8,8 +8,8 @@ FocusScope {
     Keys.onEscapePressed: NotificationState.closeHistory()
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 12
-        spacing: 8
+        anchors.margins: Theme.space3
+        spacing: Theme.space2
         RowLayout {
             Layout.fillWidth: true
             Text {
@@ -59,8 +59,8 @@ FocusScope {
                     required property var modelData
                     width: list.width - 12
                     height: card.implicitHeight
-                    color: Qt.alpha(Theme.colBorder, 0.3)
-                    radius: 9
+                    color: Qt.alpha(Theme.colSurfaceRaised, 0.72)
+                    radius: Theme.radiusMedium
                     NotificationCard { id: card; width: parent.width; record: modelData }
                 }
             }

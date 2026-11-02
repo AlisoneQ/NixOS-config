@@ -20,12 +20,14 @@ Rectangle {
         return entry.icon
     }
 
-    height: 54
-    radius: 11
+    height: 52
+    radius: Theme.radiusMedium
     color: selected ? Qt.alpha(Theme.colAccent, 0.18) :
                       (hovered ? Qt.alpha(Theme.colBorder, 0.34) : "transparent")
     border.width: selected ? 1 : 0
     border.color: Qt.alpha(Theme.colAccent, 0.58)
+
+    Behavior on border.width { NumberAnimation { duration: Theme.motionFast } }
 
     Behavior on color {
         ColorAnimation { duration: Theme.motionFast }
@@ -35,7 +37,7 @@ Rectangle {
         anchors.fill: parent
         anchors.leftMargin: 14
         anchors.rightMargin: 14
-        spacing: 11
+        spacing: Theme.space3
 
         Rectangle {
             Layout.preferredWidth: 2

@@ -5,8 +5,8 @@ import ".."
 
 Item {
     id: widget
-    implicitWidth: AudioState.feedbackVisible ? 78 : 28
-    implicitHeight: 28
+    implicitWidth: AudioState.feedbackVisible ? 78 : Theme.controlSize
+    implicitHeight: Theme.controlSize
 
     property string iconName: AudioState.outputMuted ? "volume_off" :
                               AudioState.outputVolume <= 0.01 ? "volume_mute" :
@@ -16,8 +16,8 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: 8
-        color: audioMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.5) : "transparent"
+        radius: Theme.radiusSmall
+        color: audioMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.46) : Qt.alpha(Theme.colSurfaceRaised, 0.18)
         border.width: audioMouse.containsMouse ? 1 : 0
         border.color: Qt.alpha(Theme.colBorder, 0.7)
         Behavior on color { ColorAnimation { duration: Theme.motionFast } }

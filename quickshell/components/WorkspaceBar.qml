@@ -7,9 +7,9 @@ import ".."
 
 RowLayout {
     id: workspaceBar
-    spacing: 3
-    implicitWidth: workspaces.length * 28 + Math.max(0, workspaces.length - 1) * spacing
-    implicitHeight: 28
+    spacing: Theme.space1
+    implicitWidth: workspaces.length * Theme.controlSize + Math.max(0, workspaces.length - 1) * spacing
+    implicitHeight: Theme.controlSize
 
     required property string outputName
     property var allWorkspaces: WorkspaceState.workspaces
@@ -74,17 +74,17 @@ RowLayout {
                 displayedIconName = desktopIconName
             }
 
-            Layout.preferredWidth: 28
-            Layout.preferredHeight: 26
-            Layout.minimumWidth: 28
-            Layout.maximumWidth: 28
-            Layout.minimumHeight: 26
-            Layout.maximumHeight: 26
+            Layout.preferredWidth: Theme.controlSize
+            Layout.preferredHeight: 28
+            Layout.minimumWidth: Theme.controlSize
+            Layout.maximumWidth: Theme.controlSize
+            Layout.minimumHeight: 28
+            Layout.maximumHeight: 28
             Layout.alignment: Qt.AlignVCenter
-            radius: 8
+            radius: Theme.radiusSmall
             scale: workspaceMouse.containsMouse ? 1.035 : 1.0
-            color: isActive ? Qt.alpha(Theme.colAccent, 0.2) :
-                              (workspaceMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.52) : "transparent")
+            color: isActive ? Qt.alpha(Theme.colAccent, 0.18) :
+                              (workspaceMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.46) : Qt.alpha(Theme.colSurfaceRaised, 0.28))
             border.width: isActive || isUrgent ? 1 : 0
             border.color: isUrgent ? Theme.colDanger : Qt.alpha(Theme.colAccent, 0.7)
 
@@ -98,6 +98,8 @@ RowLayout {
                     easing.type: Easing.OutCubic
                 }
             }
+
+            Behavior on border.width { NumberAnimation { duration: Theme.motionFast } }
 
             Text {
                 anchors.centerIn: parent
@@ -114,7 +116,9 @@ RowLayout {
                 height: 16
                 source: parent.displayedIconName ? Quickshell.iconPath(parent.displayedIconName) : ""
                 visible: parent.displayedIconName !== ""
-                opacity: parent.isActive ? 1 : 0.78
+                opacity: parent.isActive ? 1 : 0.62
+
+                Behavior on opacity { NumberAnimation { duration: Theme.motionMedium; easing.type: Easing.OutCubic } }
 
                 onStatusChanged: {
                     if (status === Image.Ready) parent.displayedIconName = parent.desktopIconName

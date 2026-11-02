@@ -29,7 +29,7 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
-        color: Qt.rgba(0, 0, 0, 0.38)
+        color: Qt.rgba(0, 0, 0, 0.46)
 
         MouseArea {
             anchors.fill: parent
@@ -44,10 +44,15 @@ PanelWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: Math.max(72, parent.height * 0.18)
-        radius: 16
-        color: Qt.alpha(Theme.colBg, 0.98)
+        radius: Theme.radiusLarge
+        color: Qt.alpha(Theme.colSurface, Theme.panelOpacity)
         border.width: 1
-        border.color: Qt.alpha(Theme.colBorder, 0.82)
+        border.color: Qt.alpha(Theme.colBorder, 0.92)
+        opacity: visible ? 1 : 0
+        scale: visible ? 1 : 0.985
+
+        Behavior on opacity { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
+        Behavior on scale { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
         focus: visible
 
         Keys.onPressed: event => {
@@ -98,8 +103,8 @@ PanelWindow {
                     required property var modelData
                     Layout.fillWidth: true
                     Layout.preferredHeight: 42
-                    radius: 10
-                    color: powerMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.46) : "transparent"
+                    radius: Theme.radiusMedium
+                    color: powerMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.46) : Qt.alpha(Theme.colSurfaceRaised, 0.2)
                     border.width: PowerMenuState.confirmAction === modelData.id ? 1 : 0
                     border.color: Qt.alpha(Theme.colAccent, 0.7)
 

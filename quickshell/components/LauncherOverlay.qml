@@ -42,7 +42,7 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
-        color: Qt.rgba(0, 0, 0, 0.38)
+        color: Qt.rgba(0, 0, 0, 0.46)
 
         MouseArea {
             anchors.fill: parent
@@ -57,15 +57,20 @@ PanelWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: Math.max(64, parent.height * 0.14)
-        radius: 18
-        color: Qt.alpha(Theme.colBg, 0.98)
+        radius: Theme.radiusLarge
+        color: Qt.alpha(Theme.colSurface, Theme.panelOpacity)
         border.width: 1
-        border.color: Qt.alpha(Theme.colBorder, 0.8)
+        border.color: Qt.alpha(Theme.colBorder, 0.92)
+        opacity: visible ? 1 : 0
+        scale: visible ? 1 : 0.985
+
+        Behavior on opacity { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
+        Behavior on scale { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
 
         Rectangle {
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            width: 72
+            width: 84
             height: 2
             radius: 1
             color: Qt.alpha(Theme.colAccent, 0.7)
@@ -88,7 +93,7 @@ PanelWindow {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 46
                 radius: 12
-                color: Qt.alpha(Theme.colTooltip, 0.82)
+            color: Qt.alpha(Theme.colSurfaceRaised, 0.88)
                 border.width: 1
                 border.color: searchInput.activeFocus ? Qt.alpha(Theme.colAccent, 0.85) : Qt.alpha(Theme.colBorder, 0.8)
 

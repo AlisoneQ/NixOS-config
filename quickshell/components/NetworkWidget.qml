@@ -5,8 +5,8 @@ import ".."
 Item {
     id: networkWidget
 
-    implicitWidth: 28
-    implicitHeight: 28
+    implicitWidth: Theme.controlSize
+    implicitHeight: Theme.controlSize
 
     property string connectionKind: "offline"
     property string connectionName: ""
@@ -98,8 +98,8 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: 8
-        color: networkMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.5) : "transparent"
+        radius: Theme.radiusSmall
+        color: networkMouse.containsMouse ? Qt.alpha(Theme.colBorder, 0.46) : Qt.alpha(Theme.colSurfaceRaised, 0.18)
         border.width: networkMouse.containsMouse ? 1 : 0
         border.color: Qt.alpha(Theme.colBorder, 0.7)
 

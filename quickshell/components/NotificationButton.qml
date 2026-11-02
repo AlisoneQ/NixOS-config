@@ -7,12 +7,13 @@ AbstractButton {
     property string symbol: ""
     property string label: ""
     property bool highlighted: false
-    implicitWidth: label ? Math.min(150, caption.implicitWidth + 20) : 28
-    implicitHeight: 28
+    implicitWidth: label ? Math.min(150, caption.implicitWidth + Theme.space4) : Theme.controlSize
+    implicitHeight: Theme.controlSize
     hoverEnabled: true
     background: Rectangle {
-        radius: 8
-        color: button.hovered || button.activeFocus ? Qt.alpha(Theme.colAccent, 0.22) : "transparent"
+        radius: Theme.radiusSmall
+        color: button.highlighted ? Qt.alpha(Theme.colAccent, 0.18) :
+               (button.hovered || button.activeFocus ? Qt.alpha(Theme.colBorder, 0.46) : Qt.alpha(Theme.colSurfaceRaised, 0.18))
         Behavior on color { ColorAnimation { duration: Theme.motionFast } }
     }
     contentItem: Text {

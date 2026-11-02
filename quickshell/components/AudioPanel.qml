@@ -7,8 +7,8 @@ Rectangle {
     id: panel
     width: 330
     height: 154
-    radius: 12
-    color: Qt.alpha(Theme.colTooltip, 0.98)
+    radius: Theme.radiusMedium
+    color: Qt.alpha(Theme.colSurfaceRaised, Theme.panelOpacity)
     border.width: 1
     border.color: Theme.colBorder
 
