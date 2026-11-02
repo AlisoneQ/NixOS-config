@@ -55,6 +55,13 @@ FocusScope {
                 model: NotificationState.history
                 boundsBehavior: Flickable.StopAtBounds
                 ScrollBar.vertical: ScrollBar {}
+                add: Transition {
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.motionContent }
+                    NumberAnimation { property: "y"; from: -8; duration: Theme.motionContent; easing.type: Easing.OutCubic }
+                }
+                displaced: Transition {
+                    NumberAnimation { properties: "y"; duration: Theme.motionContent; easing.type: Easing.OutCubic }
+                }
                 delegate: Rectangle {
                     required property var modelData
                     width: list.width - 12

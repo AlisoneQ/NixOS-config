@@ -48,8 +48,8 @@ PanelWindow {
         color: Qt.alpha(Theme.colSurface, Theme.panelOpacity)
         border.width: 1
         border.color: Qt.alpha(Theme.colBorder, 0.92)
-        opacity: visible ? 1 : 0
-        scale: visible ? 1 : 0.985
+        opacity: powerMenuWindow.visible ? 1 : 0
+        scale: powerMenuWindow.visible ? 1 : 0.985
 
         Behavior on opacity { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
         Behavior on scale { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }

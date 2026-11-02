@@ -5,7 +5,7 @@ import ".."
 
 Item {
     id: widget
-    implicitWidth: AudioState.feedbackVisible ? 78 : Theme.controlSize
+    implicitWidth: AudioState.feedbackVisible && !NotificationState.fullscreen ? 78 : Theme.controlSize
     implicitHeight: Theme.controlSize
 
     property string iconName: AudioState.outputMuted ? "volume_off" :

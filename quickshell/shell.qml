@@ -241,7 +241,7 @@ ShellRoot {
                 Item {
                     id: previewContent
                     width: bar.width
-                    y: 6
+                    y: barWindow.showPreview ? 6 : 2
                     implicitHeight: previewCard.implicitHeight
                     property var requestedRecord: NotificationState.preview
                     property var shownRecord: null
@@ -250,6 +250,7 @@ ShellRoot {
                     visible: opacity > 0
                     enabled: barWindow.showPreview
                     Behavior on opacity { NumberAnimation { duration: Theme.motionFast } }
+                    Behavior on y { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
                     NotificationCard {
                         id: previewCard
                         width: parent.width
@@ -267,10 +268,12 @@ ShellRoot {
                     id: historyContent
                     width: bar.width
                     height: Math.min(barWindow.height - 24, 520)
+                    y: barWindow.showHistory ? 0 : -6
                     opacity: barWindow.showHistory ? 1 : 0
                     visible: opacity > 0
                     enabled: barWindow.showHistory
                     Behavior on opacity { NumberAnimation { duration: Theme.motionFast } }
+                    Behavior on y { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
                 }
             }
         }

@@ -61,8 +61,8 @@ PanelWindow {
         color: Qt.alpha(Theme.colSurface, Theme.panelOpacity)
         border.width: 1
         border.color: Qt.alpha(Theme.colBorder, 0.92)
-        opacity: visible ? 1 : 0
-        scale: visible ? 1 : 0.985
+        opacity: launcherWindow.visible ? 1 : 0
+        scale: launcherWindow.visible ? 1 : 0.985
 
         Behavior on opacity { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
         Behavior on scale { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
@@ -168,6 +168,16 @@ PanelWindow {
                 clip: true
                 spacing: 3
                 model: LauncherState.results
+
+                add: Transition {
+                    ParallelAnimation {
+                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.motionFast }
+                        NumberAnimation { property: "y"; from: -6; duration: Theme.motionContent; easing.type: Easing.OutCubic }
+                    }
+                }
+                displaced: Transition {
+                    NumberAnimation { properties: "y"; duration: Theme.motionContent; easing.type: Easing.OutCubic }
+                }
 
                 delegate: LauncherResult {
                     required property var modelData
