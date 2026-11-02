@@ -40,8 +40,12 @@ Item {
                 output = ""
             } else {
                 var capacity = output.trim()
-                batteryWidget.hasBattery = capacity !== ""
-                if (batteryWidget.hasBattery) batteryWidget.batteryLevel = parseInt(capacity) || 0
+                var parsedCapacity = parseInt(capacity)
+                batteryWidget.hasBattery = capacity !== "" && !isNaN(parsedCapacity)
+                if (batteryWidget.hasBattery)
+                    batteryWidget.batteryLevel = Math.max(0, Math.min(100, parsedCapacity))
+                else
+                    batteryWidget.batteryLevel = 0
             }
         }
 

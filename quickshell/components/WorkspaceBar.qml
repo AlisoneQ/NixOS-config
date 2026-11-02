@@ -42,7 +42,8 @@ RowLayout {
             "spotify": "spotify",
             "steam": "steam",
             "thunar": "org.xfce.thunar",
-            "org.telegram.desktop": "telegram"
+            "org.telegram.desktop": "telegram",
+            "nm-connection-editor": ""
         }
         var key = (appId || "").toLowerCase()
         if (aliases[key]) return aliases[key]
@@ -64,12 +65,13 @@ RowLayout {
             required property var modelData
             property bool isActive: Number(workspaceBar.activeWorkspaceId) === Number(modelData.id)
             property bool isUrgent: modelData.is_urgent === true
-            property var appWindow: workspaceBar.workspaceApp(modelData)
+            property var appWindow: (WorkspaceState.windowsById && WorkspaceState.largestWindowByWorkspace) ?
+                                    WorkspaceState.appForWorkspace(modelData.id, modelData.active_window_id) : null
             property string desktopIconName: appWindow ? workspaceBar.desktopIcon(appWindow.app_id) : ""
             property string displayedIconName: ""
 
             onDesktopIconNameChanged: {
-                if (desktopIconName === "") displayedIconName = ""
+                displayedIconName = desktopIconName
             }
 
             Layout.preferredWidth: 28
@@ -106,18 +108,6 @@ RowLayout {
             }
 
             IconImage {
-                id: iconProbe
-                width: 1
-                height: 1
-                visible: false
-                source: parent.desktopIconName ? Quickshell.iconPath(parent.desktopIconName) : ""
-
-                onStatusChanged: {
-                    if (status === Image.Ready) parent.displayedIconName = parent.desktopIconName
-                }
-            }
-
-            IconImage {
                 id: appIcon
                 anchors.centerIn: parent
                 width: 16
@@ -125,6 +115,11 @@ RowLayout {
                 source: parent.displayedIconName ? Quickshell.iconPath(parent.displayedIconName) : ""
                 visible: parent.displayedIconName !== ""
                 opacity: parent.isActive ? 1 : 0.78
+
+                onStatusChanged: {
+                    if (status === Image.Ready) parent.displayedIconName = parent.desktopIconName
+                    else if (status === Image.Error) parent.displayedIconName = ""
+                }
             }
 
             Rectangle {

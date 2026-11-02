@@ -12,6 +12,7 @@ Item {
     property var windowsById: ({})
     property var largestWindowByWorkspace: ({})
     property var activeWorkspaceByOutput: ({})
+    property string focusedOutput: ""
 
     function rebuildWindowIndex(windowList) {
         var byId = {}
@@ -51,35 +52,38 @@ Item {
         }
         state.workspaces = workspaceList.slice()
         state.activeWorkspaceByOutput = activeByOutput
+        var focused = workspaceList.find(workspace => workspace.is_focused)
+        if (focused && focused.output) state.focusedOutput = focused.output
     }
 
-   function updateActivatedWorkspace(workspaceId) {
-    var activatedWorkspace = null
+    function updateActivatedWorkspace(workspaceId, focused) {
+        var activatedWorkspace = null
 
-    for (var i = 0; i < state.workspaces.length; i++) {
-        if (Number(state.workspaces[i].id) === Number(workspaceId)) {
-            activatedWorkspace = state.workspaces[i]
-            break
+        for (var i = 0; i < state.workspaces.length; i++) {
+            if (Number(state.workspaces[i].id) === Number(workspaceId)) {
+                activatedWorkspace = state.workspaces[i]
+                break
+            }
         }
-    }
 
-    if (!activatedWorkspace || !activatedWorkspace.output) return
+        if (!activatedWorkspace || !activatedWorkspace.output) return
 
-    var output = activatedWorkspace.output
-    var activeByOutput = Object.assign({}, state.activeWorkspaceByOutput)
+        var output = activatedWorkspace.output
+        if (focused) state.focusedOutput = output
+        var activeByOutput = Object.assign({}, state.activeWorkspaceByOutput)
 
-    activeByOutput[output] = activatedWorkspace.id
-    state.activeWorkspaceByOutput = activeByOutput
+        activeByOutput[output] = activatedWorkspace.id
+        state.activeWorkspaceByOutput = activeByOutput
 
-    state.workspaces = state.workspaces.map(workspace => {
-        if (workspace.output !== output)
-            return workspace
+        state.workspaces = state.workspaces.map(workspace => {
+            if (workspace.output !== output)
+                return workspace
 
-        return Object.assign({}, workspace, {
-            is_active: Number(workspace.id) === Number(activatedWorkspace.id)
+            return Object.assign({}, workspace, {
+                is_active: Number(workspace.id) === Number(activatedWorkspace.id)
+            })
         })
-    })
-}
+    }
 
     function updateWorkspaceActiveWindow(workspaceId, activeWindowId) {
         var updatedWorkspaces = state.workspaces.map(workspace => {
@@ -120,7 +124,7 @@ Item {
                 try {
                     var event = JSON.parse(data)
                     if (event.WorkspacesChanged) state.updateWorkspaceState(event.WorkspacesChanged.workspaces || [])
-                    if (event.WorkspaceActivated) state.updateActivatedWorkspace(event.WorkspaceActivated.id)
+                    if (event.WorkspaceActivated) state.updateActivatedWorkspace(event.WorkspaceActivated.id, event.WorkspaceActivated.focused)
                     if (event.WorkspaceActiveWindowChanged) {
                         state.updateWorkspaceActiveWindow(event.WorkspaceActiveWindowChanged.workspace_id, event.WorkspaceActiveWindowChanged.active_window_id)
                     }
@@ -141,12 +145,71 @@ Item {
         Component.onCompleted: running = true
     }
 
+    Process {
+        id: workspacesSnapshot
+        command: ["niri", "msg", "-j", "workspaces"]
+        property string output: ""
+
+        stdout: SplitParser {
+            onRead: data => workspacesSnapshot.output += data
+        }
+
+        onRunningChanged: {
+            if (running) {
+                output = ""
+                return
+            }
+            try {
+                state.updateWorkspaceState(JSON.parse(output))
+            } catch (error) {
+                // The event stream will provide the next consistent snapshot.
+            }
+        }
+    }
+
+    Process {
+        id: windowsSnapshot
+        command: ["niri", "msg", "-j", "windows"]
+        property string output: ""
+
+        stdout: SplitParser {
+            onRead: data => windowsSnapshot.output += data
+        }
+
+        onRunningChanged: {
+            if (running) {
+                output = ""
+                return
+            }
+            try {
+                state.windows = JSON.parse(output)
+                state.rebuildWindowIndex(state.windows)
+            } catch (error) {
+                // The event stream will provide the next consistent snapshot.
+            }
+        }
+    }
+
     Timer {
         id: restartTimer
         interval: 1000
         repeat: false
         onTriggered: {
-            if (!eventStream.running) eventStream.running = true
+            if (!eventStream.running) {
+                workspacesSnapshot.running = true
+                windowsSnapshot.running = true
+                eventStream.running = true
+            }
         }
+    }
+
+    function refreshSnapshots() {
+        workspacesSnapshot.running = true
+        windowsSnapshot.running = true
+    }
+
+    Component.onCompleted: {
+        refreshSnapshots()
+        eventStream.running = true
     }
 }

@@ -12,6 +12,13 @@ Rectangle {
     property bool selected: LauncherState.selectedIndex === resultIndex
     property bool clipboardEntry: entry.kind === "clipboard"
     property bool hovered: resultMouse.containsMouse
+    property bool hasIcon: !clipboardEntry && !!resolvedIconName()
+
+    function resolvedIconName() {
+        if (!entry.icon) return ""
+        if (entry.icon === "preferences-system-network") return ""
+        return entry.icon
+    }
 
     height: 54
     radius: 11
@@ -39,10 +46,20 @@ Rectangle {
         }
 
         IconImage {
-            visible: !resultRow.clipboardEntry
-            source: Quickshell.iconPath(resultRow.entry.icon || "application-x-executable")
+            visible: resultRow.hasIcon
+            source: resultRow.hasIcon ? Quickshell.iconPath(resultRow.resolvedIconName()) : ""
             Layout.preferredWidth: 28
             Layout.preferredHeight: 28
+        }
+
+        Text {
+            visible: !resultRow.clipboardEntry && !resultRow.hasIcon
+            text: "•"
+            color: Theme.colMuted
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontSize + 6
+            Layout.preferredWidth: 28
+            horizontalAlignment: Text.AlignHCenter
         }
 
         Text {

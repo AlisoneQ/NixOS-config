@@ -47,7 +47,15 @@ Item {
             var nextKind = "offline"
             var nextName = ""
             var nextSignal = 0
-            var lines = output.trim().split("\n")
+            var normalizedOutput = output.trim()
+            if (normalizedOutput === "") {
+                networkWidget.connectionKind = "offline"
+                networkWidget.connectionName = ""
+                networkWidget.signalStrength = 0
+                return
+            }
+
+            var lines = normalizedOutput.split("\n")
             for (var i = 0; i < lines.length; i++) {
                 var parts = lines[i].split(":")
                 if (parts.length >= 2 && parts[0] === "ethernet" && parts[1] === "connected") {
@@ -66,6 +74,14 @@ Item {
             networkWidget.connectionKind = nextKind
             networkWidget.connectionName = nextName
             networkWidget.signalStrength = nextSignal
+        }
+
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0 && networkProc.output.trim() === "") {
+                networkWidget.connectionKind = "offline"
+                networkWidget.connectionName = ""
+                networkWidget.signalStrength = 0
+            }
         }
 
         Component.onCompleted: running = true
