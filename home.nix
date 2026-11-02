@@ -14,6 +14,11 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     history.size = 10000;
+    loginExtra = ''
+        if [[ "$(tty)" == "/dev/tty1" ]]; then
+          exec niri-session
+        fi
+    '';
   };
 
   programs.starship = {
@@ -113,7 +118,6 @@
     niri
     quickshell
     fuzzel
-    mako
     awww
     swaylock
     swayidle
@@ -144,6 +148,7 @@
     # Applications
     firefox
     discord
+	vesktop
     steam
     pinta
 
@@ -151,7 +156,9 @@
     git
     wget
     nodejs
-	  codex
+	codex
+	ollama
+	opencode
   ];
   
   services.flatpak = {
