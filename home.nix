@@ -103,6 +103,10 @@
   };
 
   # Configuration files
+  # The old profile may still provide Mako's D-Bus activation file. Prevent it
+  # from racing Quickshell for org.freedesktop.Notifications on shell restart.
+  xdg.configFile."systemd/user/mako.service".source =
+    config.lib.file.mkOutOfStoreSymlink "/dev/null";
   xdg.configFile."niri/config.kdl".source =
     config.lib.file.mkOutOfStoreSymlink "/etc/nixos/niri/config.kdl";
   xdg.configFile."kitty/kitty.conf".source = ./kitty/kitty.conf;
