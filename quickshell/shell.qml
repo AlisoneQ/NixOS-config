@@ -1,6 +1,7 @@
 //@ pragma UseQApplication
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 
@@ -23,6 +24,16 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
 
+        PowerMenu {
+            required property var modelData
+            screen: modelData
+            outputName: modelData.name
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+
         PanelWindow {
             id: barWindow
 
@@ -35,13 +46,31 @@ ShellRoot {
                 right: true
             }
 
-            implicitHeight: 68
+            // Stable layer surface; only the animated island rectangle accepts input.
+            implicitHeight: screen.height
+            readonly property bool showHistory: NotificationState.centerVisible && NotificationState.centerOutput === modelData.name
+            readonly property bool showPreview: !NotificationState.blocked && !!NotificationState.preview && NotificationState.targetOutput === modelData.name
+            readonly property bool showAudioPanel: AudioState.panelOpen && !showHistory && !showPreview && !LauncherState.open && !PowerMenuState.open && NotificationState.targetOutput === modelData.name
+            readonly property string mode: showHistory ? "history" : showPreview ? "preview" : showAudioPanel ? "audio" : "bar"
+            WlrLayershell.namespace: "quickshell:niri-island"
+            WlrLayershell.layer: WlrLayer.Top
+            WlrLayershell.keyboardFocus: showHistory ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+            onShowHistoryChanged: if (showHistory) Qt.callLater(historyContent.forceActiveFocus)
+            IpcHandler {
+                target: "island-" + barWindow.modelData.name
+                function status(): string {
+                    return JSON.stringify({ mode: barWindow.mode, width: bar.width, height: bar.height,
+                        surfaceHeight: barWindow.height, keyboard: barWindow.showHistory,
+                        preview: previewContent.shownRecord ? previewContent.shownRecord.notificationId : null,
+                        historyCount: NotificationState.history.length })
+                }
+            }
 
             // One extra workspace worth of room.
             property int workspaceBuffer: 36
 
             // Everything that isn't part of the workspace section.
-            property int fixedWidth: 88
+            property int fixedWidth: 156
 
             // The visible island grows with the workspace bar,
             // while always leaving room for one more workspace.
@@ -74,13 +103,18 @@ ShellRoot {
 
                 y: bar.entered ? 0 : -5
 
-                width: Math.min(parent.width, contentWidth)
-                height: 40
+                width: Math.min(parent.width, barWindow.mode === "bar" ? contentWidth : barWindow.showHistory ? 520 : barWindow.showAudioPanel ? 370 : 460)
+                height: barWindow.showHistory ? Math.min(barWindow.height - 24, 520) :
+                        barWindow.showPreview ? Math.min(barWindow.height - 24, Math.max(114, previewContent.implicitHeight + 12)) :
+                        barWindow.showAudioPanel ? 212 : 42
+                clip: true
 
                 topLeftRadius: 0
                 topRightRadius: 0
-                bottomLeftRadius: 13
-                bottomRightRadius: 13
+                bottomLeftRadius: barWindow.mode === "bar" ? 13 : 18
+                bottomRightRadius: bottomLeftRadius
+                Behavior on height { NumberAnimation { duration: Theme.motionSlow; easing.type: Easing.OutCubic } }
+                Behavior on bottomLeftRadius { NumberAnimation { duration: Theme.motionSlow; easing.type: Easing.OutCubic } }
 
                 color: Qt.alpha(Theme.colBg, 0.94)
 
@@ -122,6 +156,14 @@ ShellRoot {
                     color: Qt.alpha(Theme.colAccent, 0.58)
                 }
 
+                Item {
+                    id: normalContent
+                    width: bar.width
+                    height: 42
+                    opacity: barWindow.showHistory || barWindow.showPreview ? 0 : 1
+                    visible: opacity > 0
+                    enabled: !barWindow.showHistory && !barWindow.showPreview
+                    Behavior on opacity { NumberAnimation { duration: Theme.motionFast } }
                 WorkspaceBar {
                     id: workspaceBar
 
@@ -134,31 +176,95 @@ ShellRoot {
 
                 Rectangle {
                     width: 64
-                    height: 28
+                    height: 36
 
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
 
                     radius: 9
-                    color: Qt.alpha(Theme.colTooltip, 0.7)
+                    color: Qt.alpha(Theme.colTooltip, 0.50)
 
                     Clock {
                         anchors.centerIn: parent
                     }
                 }
-
-                NetworkWidget {
-                    anchors.right: parent.right
-                    anchors.rightMargin: batteryWidget.visible ? 46 : 12
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                BatteryWidget {
-                    id: batteryWidget
-
+                Row {
                     anchors.right: parent.right
                     anchors.rightMargin: 12
                     anchors.verticalCenter: parent.verticalCenter
+
+                    spacing: 6
+
+                    BatteryWidget {
+                        id: batteryWidget
+                    }
+
+                    NetworkWidget {
+                        id: networkWidget
+                    }
+
+                    AudioWidget {
+                        id: audioWidget
+                    }
+
+                    NotificationButton {
+                        symbol: NotificationState.dnd ? "notifications_off" : "notifications"
+                        label: "Notification history"
+                        highlighted: NotificationState.historyOpen || NotificationState.dnd
+                        onClicked: NotificationState.toggleHistory(modelData.name)
+                    }
+
+                    PowerButton {
+                        id: powerButton
+                        outputName: modelData.name
+                    }
+                }
+
+                AudioPanel {
+                    id: audioPanel
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.top
+                    anchors.topMargin: 48
+                    visible: barWindow.showAudioPanel
+                    enabled: visible
+                    opacity: visible ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: Theme.motionFast } }
+                }
+                }
+
+                Item {
+                    id: previewContent
+                    width: bar.width
+                    y: 6
+                    implicitHeight: previewCard.implicitHeight
+                    property var requestedRecord: NotificationState.preview
+                    property var shownRecord: null
+                    onRequestedRecordChanged: previewSwap.restart()
+                    opacity: barWindow.showPreview ? 1 : 0
+                    visible: opacity > 0
+                    enabled: barWindow.showPreview
+                    Behavior on opacity { NumberAnimation { duration: Theme.motionFast } }
+                    NotificationCard {
+                        id: previewCard
+                        width: parent.width
+                        compact: true
+                        record: previewContent.shownRecord
+                    }
+                    SequentialAnimation {
+                        id: previewSwap
+                        NumberAnimation { target: previewCard; property: "opacity"; to: 0; duration: Theme.motionFast / 2 }
+                        ScriptAction { script: previewContent.shownRecord = previewContent.requestedRecord }
+                        NumberAnimation { target: previewCard; property: "opacity"; to: 1; duration: Theme.motionFast }
+                    }
+                }
+                NotificationCenter {
+                    id: historyContent
+                    width: bar.width
+                    height: Math.min(barWindow.height - 24, 520)
+                    opacity: barWindow.showHistory ? 1 : 0
+                    visible: opacity > 0
+                    enabled: barWindow.showHistory
+                    Behavior on opacity { NumberAnimation { duration: Theme.motionFast } }
                 }
             }
         }

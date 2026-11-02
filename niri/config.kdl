@@ -377,6 +377,7 @@ binds {
     Mod+T hotkey-overlay-title="Open a Terminal: kitty" { spawn "kitty"; }
     Mod+Space hotkey-overlay-title="Run an Application" { spawn "qs" "-p" "/etc/nixos/quickshell" "ipc" "call" "launcher" "toggle"; }
     Mod+V hotkey-overlay-title="Search Clipboard History" { spawn "qs" "-p" "/etc/nixos/quickshell" "ipc" "call" "launcher" "clipboardToggle"; }
+    Mod+N hotkey-overlay-title="Notification History" { spawn "qs" "-p" "/etc/nixos/quickshell" "ipc" "call" "notifications" "history"; }
     // Mod+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "~/.config/niri/scripts/run.sh"; } 
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
     Mod+E hotkey-overlay-title="Run an Application: yazi" { spawn "kitty" "-e" "yazi"; }
@@ -391,10 +392,10 @@ binds {
     // The allow-when-locked=true property makes them work even when the session is locked.
     // Using spawn-sh allows to pass multiple arguments together with the command.
     // "-l 1.0" limits the volume to 100%.
-    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+ -l 1.0"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"; }
-    XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
-    XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "qs" "-p" "/etc/nixos/quickshell" "ipc" "call" "audio" "volumeUp"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "qs" "-p" "/etc/nixos/quickshell" "ipc" "call" "audio" "volumeDown"; }
+    XF86AudioMute        allow-when-locked=true { spawn "qs" "-p" "/etc/nixos/quickshell" "ipc" "call" "audio" "toggleMute"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn "qs" "-p" "/etc/nixos/quickshell" "ipc" "call" "audio" "micMute"; }
 
     // Example media keys mapping using playerctl.
     // This will work with any MPRIS-enabled media player.
@@ -599,7 +600,7 @@ binds {
     Mod+Shift+Equal { set-window-height "+10%"; }
 
     // Move the focused window between the floating and the tiling layout.
-    Mod+N       { toggle-window-floating; }
+    Mod+Ctrl+N  { toggle-window-floating; }
     Mod+Shift+N { switch-focus-between-floating-and-tiling; }
 
     // Toggle tabbed column display mode.
@@ -616,6 +617,7 @@ binds {
     // Mod+Shift+Space { switch-layout "prev"; }
 
     Print { screenshot; }
+    Mod+Shift+S { screenshot; }
     Ctrl+Print { screenshot-screen; }
     Alt+Print { screenshot-window; }
 
