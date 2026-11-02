@@ -27,6 +27,7 @@ Rectangle {
                 to: AudioState.maxVolume
                 value: AudioState.outputVolume
                 onMoved: AudioState.setOutputVolume(value)
+                onPressedChanged: if (!pressed) AudioState.setOutputVolume(value)
             }
             Text { text: Math.round(AudioState.outputVolume * 100) + "%"; color: Theme.colFg; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize - 2; Layout.preferredWidth: 34 }
             NotificationButton {
@@ -46,6 +47,7 @@ Rectangle {
                 to: AudioState.maxVolume
                 value: AudioState.inputVolume
                 onMoved: AudioState.setInputVolume(value)
+                onPressedChanged: if (!pressed) AudioState.setInputVolume(value)
             }
             Text { text: Math.round(AudioState.inputVolume * 100) + "%"; color: Theme.colFg; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize - 2; Layout.preferredWidth: 34 }
             NotificationButton {
