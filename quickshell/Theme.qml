@@ -1,5 +1,6 @@
 pragma Singleton
 import QtQuick
+import Quickshell
 
 QtObject {
     // Core palette: surfaces stay near-black while the warm accent carries focus.
@@ -20,6 +21,7 @@ QtObject {
     readonly property int space3: 12
     readonly property int space4: 16
     readonly property int islandHeight: 44
+    readonly property int islandTop: 8
     readonly property int controlSize: 30
     readonly property int radiusSmall: 8
     readonly property int radiusMedium: 12
@@ -30,8 +32,10 @@ QtObject {
     readonly property string fontFamily: "JetBrainsMono Nerd Font"
     readonly property string iconFontFamily: "Material Symbols Rounded"
     readonly property int fontSize: 13
-    readonly property int motionFast: 120
-    readonly property int motionMedium: 180
-    readonly property int motionSlow: 260
-    readonly property int motionContent: 160
+    property bool reducedMotion: Quickshell.env("QS_REDUCED_MOTION") === "1"
+    readonly property int motionFast: reducedMotion ? 0 : 120
+    readonly property int motionMedium: reducedMotion ? 0 : 180
+    readonly property int motionSlow: reducedMotion ? 0 : 260
+    readonly property int motionContent: reducedMotion ? 0 : 160
+    readonly property int easing: Easing.OutCubic
 }

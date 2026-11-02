@@ -4,277 +4,264 @@ import Quickshell.Wayland
 import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
-
 import "components"
 
 ShellRoot {
     id: root
+    property string audioOutput: "" // Captured once per explicit audio-panel open.
+    property bool feedbackArmed: false
+    Timer { interval: 600; running: true; onTriggered: root.feedbackArmed = true }
 
-    Variants {
-        model: Quickshell.screens
-
-        LauncherOverlay {
-            required property var modelData
-
-            screen: modelData
-            outputName: modelData.name
+    // One explicit interactive mode at a time. Passive events never change it.
+    Connections {
+        target: LauncherState
+        function onOpenChanged() {
+            if (!LauncherState.open) return
+            PowerMenuState.close()
+            AudioState.closePanel()
+            NotificationState.closeHistory()
         }
+    }
+    Connections {
+        target: PowerMenuState
+        function onOpenChanged() {
+            if (!PowerMenuState.open) return
+            LauncherState.close()
+            AudioState.closePanel()
+            NotificationState.closeHistory()
+        }
+    }
+    Connections {
+        target: AudioState
+        function onPanelOpenChanged() {
+            if (!AudioState.panelOpen) return
+            root.audioOutput = NotificationState.targetOutput
+            LauncherState.close()
+            PowerMenuState.close()
+            NotificationState.closeHistory()
+        }
+    }
+    Connections {
+        target: NotificationState
+        function onHistoryOpenChanged() {
+            if (!NotificationState.historyOpen) return
+            LauncherState.close()
+            PowerMenuState.close()
+            AudioState.closePanel()
+        }
+    }
+    IpcHandler {
+        target: "appearance"
+        function reducedMotion(enabled: bool) { Theme.reducedMotion = enabled }
     }
 
     Variants {
         model: Quickshell.screens
-
-        PowerMenu {
-            required property var modelData
-            screen: modelData
-            outputName: modelData.name
-        }
-    }
-
-    Variants {
-        model: Quickshell.screens
-
         PanelWindow {
-            id: barWindow
-
+            id: window
             required property var modelData
             screen: modelData
-
-            anchors {
-                top: true
-                left: true
-                right: true
-            }
-
-            // Stable layer surface; only the animated island rectangle accepts input.
+            anchors { top: true; left: true; right: true }
+            // Stable backing surface, with a mask that follows only the island.
             implicitHeight: screen.height
-            readonly property bool showHistory: NotificationState.centerVisible && NotificationState.centerOutput === modelData.name
-            readonly property bool showPreview: !NotificationState.blocked && !!NotificationState.preview && NotificationState.targetOutput === modelData.name
-            readonly property bool showAudioPanel: AudioState.panelOpen && !showHistory && !showPreview && !LauncherState.open && !PowerMenuState.open && NotificationState.targetOutput === modelData.name
-            readonly property string mode: showHistory ? "history" : showPreview ? "preview" : showAudioPanel ? "audio" : "bar"
+            color: "transparent"
+            exclusiveZone: Theme.islandTop + Theme.islandHeight + Theme.space2
             WlrLayershell.namespace: "quickshell:niri-island"
             WlrLayershell.layer: WlrLayer.Top
-            WlrLayershell.keyboardFocus: showHistory ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
-            onShowHistoryChanged: if (showHistory) Qt.callLater(historyContent.forceActiveFocus)
+            WlrLayershell.keyboardFocus: interactive ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+
+            readonly property bool showLauncher: LauncherState.open &&
+                NotificationState.resolveOutput(LauncherState.targetOutput) === modelData.name
+            readonly property bool showPower: PowerMenuState.open &&
+                NotificationState.resolveOutput(PowerMenuState.targetOutput) === modelData.name
+            readonly property bool showAudio: AudioState.panelOpen &&
+                NotificationState.resolveOutput(root.audioOutput) === modelData.name
+            readonly property bool showHistory: NotificationState.centerVisible &&
+                NotificationState.centerOutput === modelData.name
+            readonly property bool showPreview: !NotificationState.blocked && !!NotificationState.preview &&
+                NotificationState.targetOutput === modelData.name
+            readonly property bool showFeedback: root.feedbackArmed && AudioState.feedbackVisible &&
+                !NotificationState.menuActive && !NotificationState.historyOpen && !NotificationState.fullscreen &&
+                NotificationState.targetOutput === modelData.name
+            readonly property string mode: showLauncher ? "launcher" : showPower ? "power" :
+                showHistory ? "history" : showAudio ? "audio" : showPreview ? "preview" :
+                showFeedback ? "feedback" : "bar"
+            readonly property bool interactive: showLauncher || showPower || showAudio || showHistory
+            readonly property real compactWidth: 2 * Math.max(workspaceGroup.implicitWidth, statusRow.implicitWidth) + 112
+            readonly property real targetWidth: Math.min(width - 24, widthFor(mode))
+            readonly property real targetHeight: Math.min(height - Theme.islandTop - 16, heightFor(mode))
+
+            function widthFor(value) {
+                if (value === "launcher") return 600
+                if (value === "history") return 520
+                if (value === "power" || value === "audio") return 380
+                if (value === "preview") return 460
+                if (value === "feedback") return 300
+                return compactWidth
+            }
+            function heightFor(value) {
+                if (value === "launcher") return launcherContent.implicitHeight
+                if (value === "history") return 500
+                if (value === "power") return powerContent.implicitHeight
+                if (value === "audio") return 188
+                if (value === "preview") return Math.max(112, previewCard.implicitHeight + 8)
+                if (value === "feedback") return 76
+                return Theme.islandHeight
+            }
+            function closePanel() {
+                if (showLauncher) LauncherState.close()
+                else if (showPower) PowerMenuState.close()
+                else if (showHistory) NotificationState.closeHistory()
+                else if (showAudio) AudioState.closePanel()
+            }
+            function focusContent() {
+                if (!interactive || content.displayMode !== mode) return
+                if (showLauncher) launcherContent.takeFocus()
+                else if (showPower) powerContent.takeFocus()
+                else if (showHistory) historyContent.forceActiveFocus()
+                else audioContent.forceActiveFocus()
+            }
+            onModeChanged: transition.restart()
+
+            mask: Region { item: island; radius: island.radius }
             IpcHandler {
-                target: "island-" + barWindow.modelData.name
+                target: "island-" + window.modelData.name
                 function status(): string {
-                    return JSON.stringify({ mode: barWindow.mode, width: bar.width, height: bar.height,
-                        surfaceHeight: barWindow.height, keyboard: barWindow.showHistory,
-                        preview: previewContent.shownRecord ? previewContent.shownRecord.notificationId : null,
+                    return JSON.stringify({ mode: window.mode, displayed: content.displayMode,
+                        width: island.width, height: island.height, x: island.x, y: island.y,
+                        targetWidth: window.targetWidth, targetHeight: window.targetHeight,
+                        opacity: content.opacity, transitioning: transition.running,
+                        keyboard: window.interactive,
+                        inputFocused: launcherContent.inputFocused,
+                        selected: LauncherState.selectedIndex, results: LauncherState.results.length,
+                        outputVolume: AudioState.outputVolume, inputVolume: AudioState.inputVolume,
+                        outputMuted: AudioState.outputMuted, inputMuted: AudioState.inputMuted,
+                        reducedMotion: Theme.reducedMotion, fullscreen: NotificationState.fullscreen,
+                        workspaces: workspaceBar.workspaces.map(w => ({ id: w.id, active: w.id === workspaceBar.activeWorkspaceId,
+                            hasApp: !!WorkspaceState.appForWorkspace(w.id, w.active_window_id) })),
                         historyCount: NotificationState.history.length })
                 }
             }
 
-            // One extra workspace worth of room.
-            property int workspaceBuffer: 36
-
-            // Everything that isn't part of the workspace section.
-            property int fixedWidth: 156
-
-            // The visible island grows with the workspace bar,
-            // while always leaving room for one more workspace.
-            property int contentWidth:
-                (workspaceBar.implicitWidth + workspaceBuffer) * 2
-                + fixedWidth
-
-            color: "transparent"
-            exclusiveZone: Theme.islandHeight
-
-            margins {
-                top: 0
-                bottom: 0
-                left: 10
-                right: 10
-            }
-
-            // Only the actual island receives mouse input.
-            mask: Region {
-                item: bar
-            }
-
             Rectangle {
-                id: bar
-
-                property bool entered: false
-
+                id: island
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-
-                y: bar.entered ? 0 : -5
-
-                width: Math.min(parent.width, barWindow.mode === "bar" ? contentWidth : barWindow.showHistory ? 520 : barWindow.showAudioPanel ? 370 : 460)
-                height: barWindow.showHistory ? Math.min(barWindow.height - Theme.space4 * 2, 520) :
-                        barWindow.showPreview ? Math.min(barWindow.height - 24, Math.max(114, previewContent.implicitHeight + 12)) :
-                        barWindow.showAudioPanel ? 212 : Theme.islandHeight
-                clip: true
-
-                topLeftRadius: 0
-                topRightRadius: 0
-                bottomLeftRadius: barWindow.mode === "bar" ? Theme.radiusMedium : Theme.radiusLarge
-                bottomRightRadius: bottomLeftRadius
-                Behavior on height { NumberAnimation { duration: Theme.motionSlow; easing.type: Easing.OutCubic } }
-                Behavior on bottomLeftRadius { NumberAnimation { duration: Theme.motionSlow; easing.type: Easing.OutCubic } }
-
-                color: Qt.alpha(Theme.colSurface, Theme.surfaceOpacity)
-
+                y: Theme.islandTop
+                width: window.targetWidth
+                height: window.targetHeight
+                radius: window.mode === "bar" ? Theme.radiusMedium : Theme.radiusLarge
+                color: Qt.alpha(Theme.colSurface, Theme.panelOpacity)
                 border.width: 1
-                border.color: Qt.alpha(Theme.colBorder, 0.84)
+                border.color: Qt.alpha(Theme.colBorder, 0.9)
+                clip: true
+                Behavior on width { NumberAnimation { duration: Theme.motionSlow; easing.type: Theme.easing } }
+                Behavior on height { NumberAnimation { duration: Theme.motionSlow; easing.type: Theme.easing } }
+                Behavior on radius { NumberAnimation { duration: Theme.motionSlow; easing.type: Theme.easing } }
 
-                opacity: bar.entered ? 1 : 0
-
-                Component.onCompleted: entered = true
-
-                Behavior on y {
-                    NumberAnimation {
-                        duration: Theme.motionSlow
-                        easing.type: Easing.OutCubic
-                    }
-                }
-
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: Theme.motionSlow
-                        easing.type: Easing.OutCubic
-                    }
-                }
-
-                Behavior on width {
-                    NumberAnimation {
-                        duration: Theme.motionMedium
-                        easing.type: Easing.OutCubic
-                    }
-                }
-
-                Rectangle {
+                FocusScope {
+                    id: content
+                    property string displayMode: "bar"
+                    // Content has stable destination geometry while its enclosing surface morphs.
+                    width: Math.min(window.width - 24, window.widthFor(displayMode))
+                    height: Math.min(window.height - Theme.islandTop - 16, window.heightFor(displayMode))
                     anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-
-                    width: Math.min(88, parent.width * 0.24)
-                    height: 1
-
-                    color: Qt.alpha(Theme.colAccent, 0.58)
-
-                    Behavior on width { NumberAnimation { duration: Theme.motionMedium; easing.type: Easing.OutCubic } }
-                }
-
-                Item {
-                    id: normalContent
-                    width: bar.width
-                    height: Theme.islandHeight
-                    opacity: barWindow.showHistory || barWindow.showPreview ? 0 : 1
-                    y: barWindow.showHistory || barWindow.showPreview ? -4 : 0
-                    visible: opacity > 0
-                    enabled: !barWindow.showHistory && !barWindow.showPreview
-                    Behavior on opacity { NumberAnimation { duration: Theme.motionFast } }
-                    Behavior on y { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
-                WorkspaceBar {
-                    id: workspaceBar
-
-                    anchors.left: parent.left
-                    anchors.leftMargin: Theme.space3
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    outputName: modelData.name
-                }
-
-                Rectangle {
-                    width: 64
-                    height: 36
-
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    radius: Theme.radiusSmall
-                    color: Qt.alpha(Theme.colSurfaceRaised, 0.78)
-                    border.width: 1
-                    border.color: Qt.alpha(Theme.colBorder, 0.62)
-
-                    Clock {
-                        anchors.centerIn: parent
-                    }
-                }
-                Row {
-                    anchors.right: parent.right
-                    anchors.rightMargin: Theme.space3
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    spacing: Theme.space1
-
-                    BatteryWidget {
-                        id: batteryWidget
+                    enabled: displayMode === window.mode
+                    Keys.onEscapePressed: event => {
+                        if (window.interactive) { window.closePanel(); event.accepted = true }
+                        else event.accepted = false
                     }
 
-                    NetworkWidget {
-                        id: networkWidget
+                    Item {
+                        anchors.fill: parent
+                        visible: content.displayMode === "bar"
+                        Row {
+                            id: workspaceGroup
+                            anchors.left: parent.left
+                            anchors.leftMargin: Theme.space3
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: Theme.space1
+                            NotificationButton {
+                                symbol: "apps"; label: "Open launcher"
+                                onClicked: LauncherState.openLauncher()
+                            }
+                            WorkspaceBar { id: workspaceBar; outputName: window.modelData.name }
+                        }
+                        Clock { anchors.centerIn: parent }
+                        Row {
+                            id: statusRow
+                            anchors.right: parent.right
+                            anchors.rightMargin: Theme.space3
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: Theme.space1
+                            BatteryWidget {}
+                            NetworkWidget {}
+                            AudioWidget {}
+                            NotificationButton {
+                                symbol: NotificationState.dnd ? "notifications_off" : "notifications"
+                                label: "Notification history"
+                                highlighted: NotificationState.dnd
+                                onClicked: NotificationState.toggleHistory(window.modelData.name)
+                            }
+                            PowerButton { outputName: window.modelData.name }
+                        }
                     }
-
-                    AudioWidget {
-                        id: audioWidget
+                    LauncherOverlay {
+                        id: launcherContent
+                        anchors.fill: parent
+                        visible: content.displayMode === "launcher"
                     }
-
-                    NotificationButton {
-                        symbol: NotificationState.dnd ? "notifications_off" : "notifications"
-                        label: "Notification history"
-                        highlighted: NotificationState.historyOpen || NotificationState.dnd
-                        onClicked: NotificationState.toggleHistory(modelData.name)
+                    PowerMenu {
+                        id: powerContent
+                        anchors.fill: parent
+                        visible: content.displayMode === "power"
                     }
-
-                    PowerButton {
-                        id: powerButton
-                        outputName: modelData.name
+                    NotificationCenter {
+                        id: historyContent
+                        anchors.fill: parent
+                        visible: content.displayMode === "history"
                     }
-                }
-
-                AudioPanel {
-                    id: audioPanel
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: Theme.islandHeight + Theme.space1
-                    visible: barWindow.showAudioPanel
-                    enabled: visible
-                    opacity: visible ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
-                }
-                }
-
-                Item {
-                    id: previewContent
-                    width: bar.width
-                    y: barWindow.showPreview ? 6 : 2
-                    implicitHeight: previewCard.implicitHeight
-                    property var requestedRecord: NotificationState.preview
-                    property var shownRecord: null
-                    onRequestedRecordChanged: previewSwap.restart()
-                    opacity: barWindow.showPreview ? 1 : 0
-                    visible: opacity > 0
-                    enabled: barWindow.showPreview
-                    Behavior on opacity { NumberAnimation { duration: Theme.motionFast } }
-                    Behavior on y { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
+                    AudioPanel {
+                        id: audioContent
+                        anchors.fill: parent
+                        visible: content.displayMode === "audio"
+                    }
                     NotificationCard {
                         id: previewCard
                         width: parent.width
+                        y: 4
+                        visible: content.displayMode === "preview"
                         compact: true
-                        record: previewContent.shownRecord
+                        property var retainedRecord: null
+                        record: NotificationState.preview || retainedRecord
+                        Connections {
+                            target: NotificationState
+                            function onPreviewChanged() {
+                                if (NotificationState.preview) previewCard.retainedRecord = NotificationState.preview
+                            }
+                        }
                     }
-                    SequentialAnimation {
-                        id: previewSwap
-                        NumberAnimation { target: previewCard; property: "opacity"; to: 0; duration: Theme.motionFast / 2 }
-                        ScriptAction { script: previewContent.shownRecord = previewContent.requestedRecord }
-                        NumberAnimation { target: previewCard; property: "opacity"; to: 1; duration: Theme.motionFast }
+                    VolumeFeedback {
+                        anchors.fill: parent
+                        visible: content.displayMode === "feedback"
                     }
                 }
-                NotificationCenter {
-                    id: historyContent
-                    width: bar.width
-                    height: Math.min(barWindow.height - 24, 520)
-                    y: barWindow.showHistory ? 0 : -6
-                    opacity: barWindow.showHistory ? 1 : 0
-                    visible: opacity > 0
-                    enabled: barWindow.showHistory
-                    Behavior on opacity { NumberAnimation { duration: Theme.motionFast } }
-                    Behavior on y { NumberAnimation { duration: Theme.motionContent; easing.type: Easing.OutCubic } }
+            }
+
+            // Interruptible fade-out/swap/fade-in: only one content mode is drawn.
+            SequentialAnimation {
+                id: transition
+                NumberAnimation { target: content; property: "opacity"; to: 0; duration: Theme.motionFast / 2 }
+                ScriptAction {
+                    script: {
+                        content.displayMode = window.mode
+                        Qt.callLater(window.focusContent)
+                    }
                 }
+                ParallelAnimation {
+                    NumberAnimation { target: content; property: "opacity"; to: 1; duration: Theme.motionContent }
+                    NumberAnimation { target: content; property: "y"; from: Theme.reducedMotion ? 0 : 4; to: 0; duration: Theme.motionContent; easing.type: Theme.easing }
+                }
+                onFinished: window.focusContent()
             }
         }
     }

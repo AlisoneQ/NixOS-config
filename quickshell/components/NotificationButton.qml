@@ -7,9 +7,11 @@ AbstractButton {
     property string symbol: ""
     property string label: ""
     property bool highlighted: false
-    implicitWidth: label ? Math.min(150, caption.implicitWidth + Theme.space4) : Theme.controlSize
+    implicitWidth: symbol ? Theme.controlSize : Math.min(180, caption.implicitWidth + Theme.space4)
     implicitHeight: Theme.controlSize
     hoverEnabled: true
+    scale: down ? 0.94 : 1
+    Behavior on scale { NumberAnimation { duration: Theme.motionFast; easing.type: Theme.easing } }
     background: Rectangle {
         radius: Theme.radiusSmall
         color: button.highlighted ? Qt.alpha(Theme.colAccent, 0.18) :

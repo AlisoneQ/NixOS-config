@@ -44,14 +44,16 @@ Rectangle {
             Layout.preferredHeight: 22
             radius: 1
             color: Theme.colAccent
-            visible: resultRow.selected
+            opacity: resultRow.selected ? 1 : 0
         }
 
-        IconImage {
+        Image {
             visible: resultRow.hasIcon
             source: resultRow.hasIcon ? Quickshell.iconPath(resultRow.resolvedIconName()) : ""
             Layout.preferredWidth: 28
             Layout.preferredHeight: 28
+            sourceSize: Qt.size(28, 28)
+            fillMode: Image.PreserveAspectFit
         }
 
         Text {
