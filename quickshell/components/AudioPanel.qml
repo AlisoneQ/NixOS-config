@@ -6,6 +6,7 @@ import ".."
 FocusScope {
     id: panel
     implicitHeight: 188
+    function takeFocus() { outputSlider.forceActiveFocus() }
 
     ColumnLayout {
         anchors.fill: parent
@@ -36,9 +37,9 @@ FocusScope {
                 value: AudioState.outputVolume
                 enabled: !!AudioState.outputDevice && AudioState.outputDevice.ready
                 Accessible.name: "Output volume"
-                onMoved: AudioState.setOutputVolume(value)
+                onPercentRequested: percent => AudioState.setOutputPercent(percent)
             }
-            Text { text: Math.round(AudioState.outputVolume * 100) + "%"; color: Theme.colFg; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize - 2; Layout.preferredWidth: 34 }
+            Text { text: AudioState.outputPercent + "%"; color: Theme.colFg; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize - 2; Layout.preferredWidth: 34 }
             NotificationButton {
                 symbol: AudioState.outputMuted ? "volume_off" : "volume_up"
                 label: AudioState.outputMuted ? "Unmute output" : "Mute output"
@@ -57,9 +58,9 @@ FocusScope {
                 value: AudioState.inputVolume
                 enabled: !!AudioState.inputDevice && AudioState.inputDevice.ready
                 Accessible.name: "Microphone volume"
-                onMoved: AudioState.setInputVolume(value)
+                onPercentRequested: percent => AudioState.setInputPercent(percent)
             }
-            Text { text: Math.round(AudioState.inputVolume * 100) + "%"; color: Theme.colFg; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize - 2; Layout.preferredWidth: 34 }
+            Text { text: AudioState.inputPercent + "%"; color: Theme.colFg; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize - 2; Layout.preferredWidth: 34 }
             NotificationButton {
                 symbol: AudioState.inputMuted ? "mic_off" : "mic"
                 label: AudioState.inputMuted ? "Unmute microphone" : "Mute microphone"

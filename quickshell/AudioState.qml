@@ -22,6 +22,8 @@ Item {
     readonly property var inputAudio: inputDevice && inputDevice.audio ? inputDevice.audio : null
     readonly property real outputVolume: outputAudio ? clamp(outputAudio.volume) : 0
     readonly property real inputVolume: inputAudio ? clamp(inputAudio.volume) : 0
+    readonly property int outputPercent: Math.round(outputVolume * 100)
+    readonly property int inputPercent: Math.round(inputVolume * 100)
     readonly property bool outputMuted: outputAudio ? outputAudio.muted : false
     readonly property bool inputMuted: inputAudio ? inputAudio.muted : false
     readonly property bool ready: Pipewire.ready && ((outputDevice && outputDevice.ready) || (inputDevice && inputDevice.ready))
@@ -41,6 +43,11 @@ Item {
         showFeedback()
     }
 
+    function setOutputPercent(percent) {
+        const maximum = Math.round(maxVolume * 100)
+        setOutputVolume(Math.max(0, Math.min(maximum, Math.round(percent))) / 100)
+    }
+
     function adjustOutputVolume(delta) {
         setOutputVolume(outputVolume + delta)
     }
@@ -53,6 +60,11 @@ Item {
 
     function setInputVolume(value) {
         if (inputAudio && inputDevice.ready) inputAudio.volume = clamp(value)
+    }
+
+    function setInputPercent(percent) {
+        const maximum = Math.round(maxVolume * 100)
+        setInputVolume(Math.max(0, Math.min(maximum, Math.round(percent))) / 100)
     }
 
     function toggleInputMute() {

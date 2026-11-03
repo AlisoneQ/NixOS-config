@@ -141,7 +141,7 @@ ShellRoot {
                 if (showLauncher) launcherContent.takeFocus()
                 else if (showPower) powerContent.takeFocus()
                 else if (showHistory) historyContent.forceActiveFocus()
-                else audioContent.forceActiveFocus()
+                else audioContent.takeFocus()
             }
             onInteractiveChanged: {
                 if (interactive) releaseFocusPending = false
@@ -173,7 +173,8 @@ ShellRoot {
                         query: LauncherState.query,
                         powerFocusedIndex: powerContent.focusedIndex,
                         selected: LauncherState.selectedIndex, results: LauncherState.results.length,
-                        outputVolume: AudioState.outputVolume, inputVolume: AudioState.inputVolume,
+                        outputVolume: AudioState.outputVolume, outputPercent: AudioState.outputPercent,
+                        inputVolume: AudioState.inputVolume, inputPercent: AudioState.inputPercent,
                         outputMuted: AudioState.outputMuted, inputMuted: AudioState.inputMuted,
                         reducedMotion: Theme.reducedMotion, fullscreen: NotificationState.fullscreen,
                         workspaces: workspaceBar.workspaces.map(w => ({ id: w.id, active: w.id === workspaceBar.activeWorkspaceId,

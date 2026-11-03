@@ -30,7 +30,7 @@ Item {
             text: widget.iconName
             color: AudioState.outputMuted ? Theme.colDanger : Theme.colFg
             font.family: Theme.iconFontFamily
-            font.pixelSize: 18
+            font.pixelSize: 21
             anchors.verticalCenter: parent.verticalCenter
         }
     }

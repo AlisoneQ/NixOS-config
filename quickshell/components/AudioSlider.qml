@@ -4,10 +4,23 @@ import ".."
 
 Slider {
     id: control
+    signal percentRequested(int percent)
     implicitWidth: 180
     implicitHeight: Theme.controlSize
     padding: 6
     hoverEnabled: true
+    stepSize: 0.01
+    snapMode: Slider.SnapAlways
+    onMoved: percentRequested(Math.round(value * 100))
+    Keys.onPressed: event => {
+        let delta = 0
+        if (event.key === Qt.Key_Left || event.key === Qt.Key_Down) delta = -1
+        else if (event.key === Qt.Key_Right || event.key === Qt.Key_Up) delta = 1
+        if (delta === 0) return
+        const maximum = Math.round(to * 100)
+        percentRequested(Math.max(0, Math.min(maximum, Math.round(value * 100) + delta)))
+        event.accepted = true
+    }
     background: Rectangle {
         x: control.leftPadding
         y: control.topPadding + control.availableHeight / 2 - height / 2
