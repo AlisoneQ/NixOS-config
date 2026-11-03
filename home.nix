@@ -109,6 +109,8 @@
     config.lib.file.mkOutOfStoreSymlink "/dev/null";
   xdg.configFile."niri/config.kdl".source =
     config.lib.file.mkOutOfStoreSymlink "/etc/nixos/niri/config.kdl";
+  xdg.configFile."quickshell/island".source =
+    config.lib.file.mkOutOfStoreSymlink "/home/alisoneq/Projects/quickshell-island";
   xdg.configFile."kitty/kitty.conf".source = ./kitty/kitty.conf;
   xdg.configFile."starship.toml".source = ./starship/starship.toml;
   xdg.configFile."nvim".source =
