@@ -1,7 +1,0 @@
-module QuickshellBar
-singleton Theme 1.0 Theme.qml
-singleton WorkspaceState 1.0 WorkspaceState.qml
-singleton LauncherState 1.0 LauncherState.qml
-singleton PowerMenuState 1.0 PowerMenuState.qml
-singleton NotificationState 1.0 NotificationState.qml
-singleton AudioState 1.0 AudioState.qml
