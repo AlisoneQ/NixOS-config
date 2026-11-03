@@ -22,6 +22,10 @@ QtObject {
     readonly property int space4: 16
     readonly property int islandHeight: 44
     readonly property int islandTop: 8
+    // Reserved output space occupied by the persistent layer-shell strut.
+    // Keep this in one place so the visual surface can be anchored back to
+    // the physical output edge without changing the work area reservation.
+    readonly property int islandReservation: islandTop + islandHeight + space2
     readonly property int controlSize: 30
     readonly property int radiusSmall: 8
     readonly property int radiusMedium: 12

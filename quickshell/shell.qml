@@ -97,6 +97,10 @@ ShellRoot {
             required property var modelData
             screen: modelData
             anchors { top: true; left: true; right: true }
+            // The persistent strut reserves the top work area. This surface
+            // is non-exclusive and must still originate at the physical
+            // output edge, rather than at the reduced work-area origin.
+            margins.top: -Theme.islandReservation
             // Stable backing surface, with a mask that follows only the island.
             implicitHeight: screen.height
             color: "transparent"

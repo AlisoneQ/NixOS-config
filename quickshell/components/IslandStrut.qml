@@ -5,7 +5,7 @@ import ".."
 // Keep the output work area stable while the interactive island surface is
 // briefly recreated to release its layer-shell keyboard grab.
 PanelWindow {
-    implicitHeight: Theme.islandTop + Theme.islandHeight + Theme.space2
+    implicitHeight: Theme.islandReservation
     color: "transparent"
     exclusiveZone: implicitHeight
     anchors { top: true; left: true; right: true }
