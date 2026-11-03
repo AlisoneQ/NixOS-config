@@ -261,7 +261,7 @@ layout {
     struts {
         // left 64
         // right 64
-        top 5
+        // top 5
         // bottom 64
     }
 }
@@ -375,7 +375,7 @@ binds {
 
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+T hotkey-overlay-title="Open a Terminal: kitty" { spawn "kitty"; }
-    Mod+Space hotkey-overlay-title="Run an Application" { spawn "qs" "-p" "/etc/nixos/quickshell" "ipc" "call" "launcher" "toggle"; }
+    Mod+Tab hotkey-overlay-title="Run an Application" { spawn "qs" "-p" "/etc/nixos/quickshell" "ipc" "call" "launcher" "toggle"; }
     Mod+V hotkey-overlay-title="Search Clipboard History" { spawn "qs" "-p" "/etc/nixos/quickshell" "ipc" "call" "launcher" "clipboardToggle"; }
     Mod+N hotkey-overlay-title="Notification History" { spawn "qs" "-p" "/etc/nixos/quickshell" "ipc" "call" "notifications" "history"; }
     // Mod+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "~/.config/niri/scripts/run.sh"; } 
@@ -554,7 +554,7 @@ binds {
     // Mod+Ctrl+1 { move-window-to-workspace 1; }
 
     // Switches focus between the current and the previous workspace.
-    Mod+Tab { focus-workspace-previous; }
+    // Mod+Tab { focus-workspace-previous; }
 
     // The following binds move the focused window in and out of a column.
     // If the window is alone, they will consume it into the nearby column to the side.

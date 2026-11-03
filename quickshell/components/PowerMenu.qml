@@ -5,8 +5,13 @@ import ".."
 
 FocusScope {
     id: powerContent
+    property int focusedIndex: -1
     implicitHeight: menuColumn.implicitHeight + 24
-    function takeFocus() { forceActiveFocus() }
+    function takeFocus() {
+        const first = actionRepeater.itemAt(0)
+        if (first) first.forceActiveFocus()
+        else forceActiveFocus()
+    }
     ColumnLayout {
         id: menuColumn
         anchors.fill: parent
@@ -42,16 +47,27 @@ FocusScope {
         }
 
         Repeater {
+            id: actionRepeater
             model: PowerMenuState.actions
 
             delegate: AbstractButton {
                 id: actionButton
                 required property var modelData
+                required property int index
                 Layout.fillWidth: true
                 Layout.preferredHeight: 42
                 hoverEnabled: true
                 Accessible.name: modelData.label
+                onActiveFocusChanged: if (activeFocus) powerContent.focusedIndex = index
                 onClicked: PowerMenuState.requestAction(modelData.id)
+                Keys.onDownPressed: event => {
+                    actionRepeater.itemAt((index + 1) % actionRepeater.count).forceActiveFocus()
+                    event.accepted = true
+                }
+                Keys.onUpPressed: event => {
+                    actionRepeater.itemAt((index - 1 + actionRepeater.count) % actionRepeater.count).forceActiveFocus()
+                    event.accepted = true
+                }
                 background: Rectangle {
                     radius: Theme.radiusMedium
                     color: actionButton.down ? Qt.alpha(Theme.colAccent, 0.25) :

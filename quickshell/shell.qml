@@ -10,6 +10,27 @@ ShellRoot {
     id: root
     property string audioOutput: "" // Captured once per explicit audio-panel open.
     property bool feedbackArmed: false
+    property int restoreWindowId: -1
+    readonly property bool interactiveOpen: LauncherState.open || PowerMenuState.open ||
+        AudioState.panelOpen || NotificationState.historyOpen
+    function closeInteractive() {
+        LauncherState.close()
+        PowerMenuState.close()
+        AudioState.closePanel()
+        NotificationState.closeHistory()
+    }
+    function restoreApplicationFocus() {
+        if (restoreWindowId <= 0) return
+        focusRestore.command = ["niri", "msg", "action", "focus-window", "--id", String(restoreWindowId)]
+        focusRestore.running = true
+        restoreWindowId = -1
+    }
+    onInteractiveOpenChanged: {
+        if (interactiveOpen) {
+            restoreWindowId = WorkspaceState.lastFocusedWindowId
+        }
+    }
+    Process { id: focusRestore }
     Timer { interval: 600; running: true; onTriggered: root.feedbackArmed = true }
 
     // One explicit interactive mode at a time. Passive events never change it.
@@ -87,6 +108,7 @@ ShellRoot {
                 showHistory ? "history" : showAudio ? "audio" : showPreview ? "preview" :
                 showFeedback ? "feedback" : "bar"
             readonly property bool interactive: showLauncher || showPower || showAudio || showHistory
+            property bool releaseFocusPending: false
             readonly property real compactWidth: 2 * Math.max(workspaceGroup.implicitWidth, statusRow.implicitWidth) + 112
             readonly property real targetWidth: Math.min(width - 24, widthFor(mode))
             readonly property real targetHeight: Math.min(height - Theme.islandTop - 16, heightFor(mode))
@@ -121,9 +143,24 @@ ShellRoot {
                 else if (showHistory) historyContent.forceActiveFocus()
                 else audioContent.forceActiveFocus()
             }
-            onModeChanged: transition.restart()
+            onInteractiveChanged: {
+                if (interactive) releaseFocusPending = false
+                else if (content.displayMode !== "bar") releaseFocusPending = true
+            }
+            onModeChanged: {
+                transition.stop()
+                content.opacity = 0
+                content.y = Theme.reducedMotion ? 0 : 4
+                content.displayMode = mode
+                Qt.callLater(focusContent)
+                transition.restart()
+            }
 
-            mask: Region { item: island; radius: island.radius }
+            // While a panel is open, the existing per-output layer surface is
+            // its modal input plane. This keeps click-away dismissal in the
+            // shared morphing window; the mask contracts back to the island as
+            // soon as the panel closes.
+            mask: Region { item: root.interactiveOpen ? inputPlane : island; radius: root.interactiveOpen ? 0 : island.radius }
             IpcHandler {
                 target: "island-" + window.modelData.name
                 function status(): string {
@@ -133,6 +170,8 @@ ShellRoot {
                         opacity: content.opacity, transitioning: transition.running,
                         keyboard: window.interactive,
                         inputFocused: launcherContent.inputFocused,
+                        query: LauncherState.query,
+                        powerFocusedIndex: powerContent.focusedIndex,
                         selected: LauncherState.selectedIndex, results: LauncherState.results.length,
                         outputVolume: AudioState.outputVolume, inputVolume: AudioState.inputVolume,
                         outputMuted: AudioState.outputMuted, inputMuted: AudioState.inputMuted,
@@ -140,6 +179,38 @@ ShellRoot {
                         workspaces: workspaceBar.workspaces.map(w => ({ id: w.id, active: w.id === workspaceBar.activeWorkspaceId,
                             hasApp: !!WorkspaceState.appForWorkspace(w.id, w.active_window_id) })),
                         historyCount: NotificationState.history.length })
+                }
+            }
+
+            Item {
+                id: inputPlane
+                anchors.fill: parent
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: root.interactiveOpen
+                    acceptedButtons: Qt.AllButtons
+                    onPressed: event => {
+                        root.closeInteractive()
+                        event.accepted = true
+                    }
+                }
+            }
+
+            Timer {
+                id: releaseFocus
+                interval: 1
+                onTriggered: {
+                    window.visible = false
+                    restoreSurface.start()
+                }
+            }
+            Timer {
+                id: restoreSurface
+                interval: 1
+                onTriggered: {
+                    window.visible = true
+                    window.releaseFocusPending = false
+                    root.restoreApplicationFocus()
                 }
             }
 
@@ -157,6 +228,14 @@ ShellRoot {
                 Behavior on width { NumberAnimation { duration: Theme.motionSlow; easing.type: Theme.easing } }
                 Behavior on height { NumberAnimation { duration: Theme.motionSlow; easing.type: Theme.easing } }
                 Behavior on radius { NumberAnimation { duration: Theme.motionSlow; easing.type: Theme.easing } }
+
+                // Consume clicks on otherwise empty panel space without
+                // preventing controls above it from receiving input.
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: window.interactive
+                    acceptedButtons: Qt.AllButtons
+                }
 
                 FocusScope {
                     id: content
@@ -247,21 +326,16 @@ ShellRoot {
                 }
             }
 
-            // Interruptible fade-out/swap/fade-in: only one content mode is drawn.
-            SequentialAnimation {
+            // The destination content is installed before the morph begins so
+            // interactive modes can accept input immediately.
+            ParallelAnimation {
                 id: transition
-                NumberAnimation { target: content; property: "opacity"; to: 0; duration: Theme.motionFast / 2 }
-                ScriptAction {
-                    script: {
-                        content.displayMode = window.mode
-                        Qt.callLater(window.focusContent)
-                    }
+                NumberAnimation { target: content; property: "opacity"; to: 1; duration: Theme.motionContent }
+                NumberAnimation { target: content; property: "y"; to: 0; duration: Theme.motionContent; easing.type: Theme.easing }
+                onFinished: {
+                    window.focusContent()
+                    if (window.releaseFocusPending && !window.interactive) releaseFocus.start()
                 }
-                ParallelAnimation {
-                    NumberAnimation { target: content; property: "opacity"; to: 1; duration: Theme.motionContent }
-                    NumberAnimation { target: content; property: "y"; from: Theme.reducedMotion ? 0 : 4; to: 0; duration: Theme.motionContent; easing.type: Theme.easing }
-                }
-                onFinished: window.focusContent()
             }
         }
     }

@@ -13,6 +13,7 @@ Item {
     property var largestWindowByWorkspace: ({})
     property var activeWorkspaceByOutput: ({})
     property string focusedOutput: ""
+    property int lastFocusedWindowId: -1
 
     function rebuildWindowIndex(windowList) {
         var byId = {}
@@ -20,6 +21,7 @@ Item {
         for (var i = 0; i < windowList.length; i++) {
             var window = windowList[i]
             byId[String(window.id)] = window
+            if (window.is_focused) state.lastFocusedWindowId = Number(window.id)
             var size = window.layout && window.layout.window_size ? window.layout.window_size : [0, 0]
             var area = Number(size[0]) * Number(size[1])
             var key = String(window.workspace_id)
@@ -134,6 +136,8 @@ Item {
                     }
                     if (event.WindowOpenedOrChanged) state.updateWindow(event.WindowOpenedOrChanged.window)
                     if (event.WindowClosed) state.removeWindow(event.WindowClosed.id)
+                    if (event.WindowFocusChanged && event.WindowFocusChanged.id !== null)
+                        state.lastFocusedWindowId = Number(event.WindowFocusChanged.id)
                 } catch (error) {
                     // Ignore malformed lines and wait for the next complete event.
                 }
