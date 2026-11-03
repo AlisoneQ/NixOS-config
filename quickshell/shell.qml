@@ -9,7 +9,6 @@ import "components"
 ShellRoot {
     id: root
     property bool feedbackArmed: false
-    property int restoreWindowId: -1
     readonly property bool interactiveOpen: LauncherState.open || PowerMenuState.open ||
         AudioState.panelOpen || NotificationState.historyOpen
     function closeInteractive() {
@@ -18,18 +17,6 @@ ShellRoot {
         AudioState.closePanel()
         NotificationState.closeHistory()
     }
-    function restoreApplicationFocus() {
-        if (restoreWindowId <= 0) return
-        focusRestore.command = ["niri", "msg", "action", "focus-window", "--id", String(restoreWindowId)]
-        focusRestore.running = true
-        restoreWindowId = -1
-    }
-    onInteractiveOpenChanged: {
-        if (interactiveOpen) {
-            restoreWindowId = WorkspaceState.lastFocusedWindowId
-        }
-    }
-    Process { id: focusRestore }
     Timer { interval: 600; running: true; onTriggered: root.feedbackArmed = true }
 
     // One explicit interactive mode at a time. Passive events never change it.
@@ -102,8 +89,8 @@ ShellRoot {
             // Stable backing surface, with a mask that follows only the island.
             implicitHeight: screen.height
             color: "transparent"
-            // Work-area reservation lives in IslandStrut so recreating this
-            // focus-bearing surface never makes Niri relayout applications.
+            // Work-area reservation lives in IslandStrut so interactive state
+            // changes never make Niri relayout applications.
             exclusiveZone: 0
             WlrLayershell.namespace: "quickshell:niri-island"
             WlrLayershell.layer: WlrLayer.Top
@@ -126,7 +113,6 @@ ShellRoot {
                 showHistory ? "history" : showAudio ? "audio" : showPreview ? "preview" :
                 showFeedback ? "feedback" : "bar"
             readonly property bool interactive: showLauncher || showPower || showAudio || showHistory
-            property bool releaseFocusPending: false
             readonly property real compactWidth: 2 * Math.max(workspaceGroup.implicitWidth, statusRow.implicitWidth) + 112
             readonly property real targetWidth: Math.min(width - 24, widthFor(mode))
             readonly property real targetHeight: Math.min(height - Theme.islandTop - 16, heightFor(mode))
@@ -160,10 +146,6 @@ ShellRoot {
                 else if (showPower) powerContent.takeFocus()
                 else if (showHistory) historyContent.forceActiveFocus()
                 else audioContent.takeFocus()
-            }
-            onInteractiveChanged: {
-                if (interactive) releaseFocusPending = false
-                else if (content.displayMode !== "bar") releaseFocusPending = true
             }
             onModeChanged: {
                 transition.stop()
@@ -212,24 +194,6 @@ ShellRoot {
                         root.closeInteractive()
                         event.accepted = true
                     }
-                }
-            }
-
-            Timer {
-                id: releaseFocus
-                interval: 1
-                onTriggered: {
-                    window.visible = false
-                    restoreSurface.start()
-                }
-            }
-            Timer {
-                id: restoreSurface
-                interval: 1
-                onTriggered: {
-                    window.visible = true
-                    window.releaseFocusPending = false
-                    root.restoreApplicationFocus()
                 }
             }
 
@@ -351,10 +315,7 @@ ShellRoot {
                 id: transition
                 NumberAnimation { target: content; property: "opacity"; to: 1; duration: Theme.motionContent }
                 NumberAnimation { target: content; property: "y"; to: 0; duration: Theme.motionContent; easing.type: Theme.easing }
-                onFinished: {
-                    window.focusContent()
-                    if (window.releaseFocusPending && !window.interactive) releaseFocus.start()
-                }
+                onFinished: window.focusContent()
             }
         }
     }

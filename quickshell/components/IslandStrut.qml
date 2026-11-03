@@ -2,8 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import ".."
 
-// Keep the output work area stable while the interactive island surface is
-// briefly recreated to release its layer-shell keyboard grab.
+// Keep the output work area independent from the interactive island surface.
 PanelWindow {
     implicitHeight: Theme.islandReservation
     color: "transparent"
