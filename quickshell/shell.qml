@@ -78,6 +78,15 @@ ShellRoot {
 
     Variants {
         model: Quickshell.screens
+        ScreenCorner { required property var modelData; screen: modelData; edge: "top" }
+    }
+    Variants {
+        model: Quickshell.screens
+        ScreenCorner { required property var modelData; screen: modelData; edge: "bottom" }
+    }
+
+    Variants {
+        model: Quickshell.screens
         PanelWindow {
             id: window
             required property var modelData

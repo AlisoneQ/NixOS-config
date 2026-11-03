@@ -26,6 +26,7 @@ QtObject {
     readonly property int radiusSmall: 8
     readonly property int radiusMedium: 12
     readonly property int radiusLarge: 18
+    readonly property int screenCornerRadius: 14
     readonly property real surfaceOpacity: 0.96
     readonly property real panelOpacity: 0.985
 
