@@ -87,6 +87,11 @@ ShellRoot {
 
     Variants {
         model: Quickshell.screens
+        IslandStrut { required property var modelData; screen: modelData }
+    }
+
+    Variants {
+        model: Quickshell.screens
         PanelWindow {
             id: window
             required property var modelData
@@ -95,7 +100,9 @@ ShellRoot {
             // Stable backing surface, with a mask that follows only the island.
             implicitHeight: screen.height
             color: "transparent"
-            exclusiveZone: Theme.islandTop + Theme.islandHeight + Theme.space2
+            // Work-area reservation lives in IslandStrut so recreating this
+            // focus-bearing surface never makes Niri relayout applications.
+            exclusiveZone: 0
             WlrLayershell.namespace: "quickshell:niri-island"
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.keyboardFocus: interactive ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
