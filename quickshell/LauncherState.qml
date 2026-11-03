@@ -11,6 +11,7 @@ Item {
     property bool open: false
     property string query: ""
     property string targetOutput: ""
+    property int outputRequestSerial: 0
     property int selectedIndex: 0
     property int resultLimit: 12
     property bool clipboardSession: false
@@ -102,19 +103,26 @@ Item {
         else entry.execute()
     }
 
-    function openLauncher() {
-        openWithQuery("")
+    function openLauncher(output) {
+        openWithQuery("", output || "")
     }
 
-    function openClipboard() {
+    function openClipboard(output) {
         refreshClipboard()
-        openWithQuery(clipboardPrefix)
+        openWithQuery(clipboardPrefix, output || "")
     }
 
-    function openWithQuery(initialQuery) {
+    function openWithQuery(initialQuery, output) {
         clipboardSession = initialQuery.startsWith(clipboardPrefix)
         query = initialQuery
         selectedIndex = 0
+        outputRequestSerial++
+        if (output) {
+            targetOutput = output
+            open = true
+            return
+        }
+        focusOutputProcess.requestSerial = outputRequestSerial
         focusOutputProcess.running = true
     }
 
@@ -124,6 +132,7 @@ Item {
     }
 
     function close() {
+        outputRequestSerial++
         open = false
         query = ""
         clipboardSession = false
@@ -144,6 +153,7 @@ Item {
         id: focusOutputProcess
         command: ["niri", "msg", "-j", "focused-output"]
         property string output: ""
+        property int requestSerial: 0
 
         stdout: SplitParser {
             onRead: data => focusOutputProcess.output += data
@@ -154,6 +164,8 @@ Item {
                 output = ""
                 return
             }
+
+            if (requestSerial !== state.outputRequestSerial) return
 
             try {
                 const focusedOutput = JSON.parse(output)
@@ -200,12 +212,12 @@ Item {
         target: "launcher"
 
         function toggle() { state.toggle() }
-        function open() { if (!state.open) state.openLauncher() }
+        function open() { if (!state.open) state.openLauncher("") }
         function close() { state.close() }
         function clipboardToggle() {
             if (state.open && state.clipboardMode) state.close()
-            else state.openClipboard()
+            else state.openClipboard("")
         }
-        function clipboardOpen() { state.openClipboard() }
+        function clipboardOpen() { state.openClipboard("") }
     }
 }

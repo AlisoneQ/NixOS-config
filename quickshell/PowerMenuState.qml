@@ -14,6 +14,7 @@ Item {
     property string targetOutput: ""
     property string confirmAction: ""
     property string fallbackOutput: ""
+    property int outputRequestSerial: 0
 
     readonly property var actions: [
         { id: "lock", label: "Lock", icon: "lock" },
@@ -30,11 +31,19 @@ Item {
         }
         confirmAction = ""
         fallbackOutput = output || ""
+        outputRequestSerial++
+        if (fallbackOutput) {
+            targetOutput = fallbackOutput
+            open = true
+            return
+        }
         focusOutputProcess.output = ""
+        focusOutputProcess.requestSerial = outputRequestSerial
         focusOutputProcess.running = true
     }
 
     function close() {
+        outputRequestSerial++
         open = false
         confirmAction = ""
     }
@@ -62,6 +71,7 @@ Item {
         id: focusOutputProcess
         command: ["niri", "msg", "-j", "focused-output"]
         property string output: ""
+        property int requestSerial: 0
 
         stdout: SplitParser {
             onRead: data => focusOutputProcess.output += data
@@ -69,6 +79,7 @@ Item {
 
         onRunningChanged: {
             if (running) return
+            if (requestSerial !== state.outputRequestSerial) return
             try {
                 state.targetOutput = JSON.parse(output).name || fallbackOutput
             } catch (error) {

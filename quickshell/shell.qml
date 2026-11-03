@@ -8,7 +8,6 @@ import "components"
 
 ShellRoot {
     id: root
-    property string audioOutput: "" // Captured once per explicit audio-panel open.
     property bool feedbackArmed: false
     property int restoreWindowId: -1
     readonly property bool interactiveOpen: LauncherState.open || PowerMenuState.open ||
@@ -56,7 +55,6 @@ ShellRoot {
         target: AudioState
         function onPanelOpenChanged() {
             if (!AudioState.panelOpen) return
-            root.audioOutput = NotificationState.targetOutput
             LauncherState.close()
             PowerMenuState.close()
             NotificationState.closeHistory()
@@ -116,7 +114,7 @@ ShellRoot {
             readonly property bool showPower: PowerMenuState.open &&
                 NotificationState.resolveOutput(PowerMenuState.targetOutput) === modelData.name
             readonly property bool showAudio: AudioState.panelOpen &&
-                NotificationState.resolveOutput(root.audioOutput) === modelData.name
+                NotificationState.resolveOutput(AudioState.targetOutput) === modelData.name
             readonly property bool showHistory: NotificationState.centerVisible &&
                 NotificationState.centerOutput === modelData.name
             readonly property bool showPreview: !NotificationState.blocked && !!NotificationState.preview &&
@@ -282,7 +280,7 @@ ShellRoot {
                             spacing: Theme.space1
                             NotificationButton {
                                 symbol: "apps"; label: "Open launcher"
-                                onClicked: LauncherState.openLauncher()
+                                onClicked: LauncherState.openLauncher(window.modelData.name)
                             }
                             WorkspaceBar { id: workspaceBar; outputName: window.modelData.name }
                         }
@@ -295,7 +293,7 @@ ShellRoot {
                             spacing: Theme.space1
                             BatteryWidget {}
                             NetworkWidget {}
-                            AudioWidget {}
+                            AudioWidget { outputName: window.modelData.name }
                             NotificationButton {
                                 symbol: NotificationState.dnd ? "notifications_off" : "notifications"
                                 label: "Notification history"

@@ -12,6 +12,7 @@ Item {
     property real maxVolume: 1.0
     property real volumeStep: 0.05
     property bool panelOpen: false
+    property string targetOutput: ""
     property bool feedbackVisible: false
     property int feedbackVolume: 0
     property bool feedbackMuted: false
@@ -75,7 +76,14 @@ Item {
         objects: [outputDevice, inputDevice].filter(device => device !== null)
     }
 
-    function togglePanel() { panelOpen = !panelOpen }
+    function togglePanel(output) {
+        if (panelOpen) {
+            closePanel()
+            return
+        }
+        targetOutput = output || WorkspaceState.focusedOutput
+        panelOpen = true
+    }
     function closePanel() { panelOpen = false }
 
     Timer {
@@ -93,7 +101,7 @@ Item {
 
     IpcHandler {
         target: "audio"
-        function toggle() { state.togglePanel() }
+        function toggle() { state.togglePanel("") }
         function close() { state.closePanel() }
         function volumeUp() { state.adjustOutputVolume(state.volumeStep) }
         function volumeDown() { state.adjustOutputVolume(-state.volumeStep) }

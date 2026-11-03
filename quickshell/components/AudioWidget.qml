@@ -7,6 +7,7 @@ Item {
     id: widget
     implicitWidth: Theme.controlSize
     implicitHeight: Theme.controlSize
+    property string outputName: ""
 
     property string iconName: AudioState.outputMuted ? "volume_off" :
                               AudioState.outputVolume <= 0.01 ? "volume_mute" :
@@ -43,7 +44,7 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: event => {
             if (event.button === Qt.RightButton) AudioState.toggleOutputMute()
-            else AudioState.togglePanel()
+            else AudioState.togglePanel(widget.outputName)
         }
         onWheel: event => {
             AudioState.adjustOutputVolume(event.angleDelta.y > 0 ? AudioState.volumeStep : -AudioState.volumeStep)
