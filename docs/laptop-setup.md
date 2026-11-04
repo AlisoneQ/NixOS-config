@@ -11,7 +11,8 @@ After publication succeeds, use the verified shell URL supplied by the desktop:
 
 ```sh
 mkdir -p "$HOME/Projects"
-read -r -p 'Verified shell Git URL: ' ISLAND_REPO_URL
+printf 'Verified shell Git URL: '
+read -r ISLAND_REPO_URL
 git clone "$ISLAND_REPO_URL" "$HOME/Projects/quickshell-island"
 sudo git clone --branch redesign/dynamic-island-visual-overhaul \
   git@github.com:AlisoneQ/NixOS-config.git /etc/nixos
