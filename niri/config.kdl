@@ -376,9 +376,9 @@ binds {
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+T hotkey-overlay-title="Open a Terminal: kitty" { spawn "kitty"; }
     Mod+Tab hotkey-overlay-title="Run an Application" { spawn "qs" "-p" "/home/alisoneq/.config/quickshell/island/src" "ipc" "call" "launcher" "toggle"; }
+    Mod+Space repeat=false hotkey-overlay-title="Toggle Control Center" { spawn "qs" "-p" "/home/alisoneq/.config/quickshell/island/src" "ipc" "call" "control-center" "toggle"; }
     Mod+V hotkey-overlay-title="Search Clipboard History" { spawn "qs" "-p" "/home/alisoneq/.config/quickshell/island/src" "ipc" "call" "launcher" "clipboardToggle"; }
     Mod+N hotkey-overlay-title="Notification History" { spawn "qs" "-p" "/home/alisoneq/.config/quickshell/island/src" "ipc" "call" "notifications" "history"; }
-    // Mod+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "~/.config/niri/scripts/run.sh"; } 
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
     Mod+E hotkey-overlay-title="Run an Application: yazi" { spawn "kitty" "-e" "yazi"; }
     Mod+W hotkey-overlay-title="Run an Application: zen-beta" { spawn "zen-beta"; }
