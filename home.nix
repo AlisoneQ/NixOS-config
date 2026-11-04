@@ -164,7 +164,12 @@
     nodejs
 	codex
 	ollama
-	opencode
+	# Nixpkgs 1d06008 ships opencode 2.2.5 with a stale Bun dependency hash.
+	(opencode.overrideAttrs (old: {
+	  node_modules = old.node_modules.overrideAttrs (_: {
+	    outputHash = "sha256-prx9dX7kUvs/E3zopkaPk5LXh3xJAy5sZeum/W8L7cA=";
+	  });
+	}))
   ];
   
   services.flatpak = {
