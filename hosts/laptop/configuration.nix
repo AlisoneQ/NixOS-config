@@ -81,6 +81,7 @@
 
   # Services
   services.upower.enable = true;
+  hardware.bluetooth.enable = true;
 
   services.getty.autologinUser = "alisoneq";
 
