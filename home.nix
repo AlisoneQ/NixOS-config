@@ -1,4 +1,4 @@
-{ inputs, config, pkgs, ... }:
+{ inputs, config, pkgs, lib, isLaptop ? false, ... }:
 
 {
   # Imports
@@ -44,7 +44,7 @@
 
   # Home Manager
   home.username = "alisoneq";
-  home.homeDirectory = "/home/alisoneq";
+  home.homeDirectory = "/home/${config.home.username}";
   home.stateVersion = "25.11";
 
   programs.home-manager.enable = true;
@@ -107,10 +107,15 @@
   # from racing Quickshell for org.freedesktop.Notifications on shell restart.
   xdg.configFile."systemd/user/mako.service".source =
     config.lib.file.mkOutOfStoreSymlink "/dev/null";
-  xdg.configFile."niri/config.kdl".source =
-    config.lib.file.mkOutOfStoreSymlink "/etc/nixos/niri/config.kdl";
+  xdg.configFile."niri/config.kdl" = if isLaptop then {
+    # Keep common shortcuts, but let laptop outputs choose their native modes.
+    text = builtins.replaceStrings [ ''output "HDMI-A-2" {'' ''include "monitor.kdl"'' ]
+      [ ''/-output "HDMI-A-2" {'' "// Laptop outputs are auto-detected." ] (builtins.readFile ./niri/config.kdl);
+  } else {
+    source = config.lib.file.mkOutOfStoreSymlink "/etc/nixos/niri/config.kdl";
+  };
   xdg.configFile."quickshell/island".source =
-    config.lib.file.mkOutOfStoreSymlink "/home/alisoneq/Projects/quickshell-island";
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Projects/quickshell-island";
   xdg.configFile."kitty/kitty.conf".source = ./kitty/kitty.conf;
   xdg.configFile."starship.toml".source = ./starship/starship.toml;
   xdg.configFile."nvim".source =
@@ -120,6 +125,9 @@
 
   # Packages
   home.packages = with pkgs; [
+    (writeShellScriptBin "quickshell-island" ''
+      exec ${quickshell}/bin/qs -p ${lib.escapeShellArg "${config.xdg.configHome}/quickshell/island/src"} "$@"
+    '')
     # Desktop / Wayland
     niri
     quickshell

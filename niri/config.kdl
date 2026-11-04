@@ -273,7 +273,7 @@ layout {
 
 // This line starts waybar, a commonly used bar for Wayland compositors.
 spawn-at-startup "waybar"
-spawn-at-startup "qs" "-p" "/home/alisoneq/.config/quickshell/island/src"
+spawn-at-startup "sh" "/etc/nixos/niri/island.sh"
 spawn-at-startup "awww-daemon"
 spawn-at-startup "sh -c 'sleep 1 && awww img ~/.config/niri/wallhaven/wall.jpg'"
 spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
@@ -375,10 +375,10 @@ binds {
 
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+T hotkey-overlay-title="Open a Terminal: kitty" { spawn "kitty"; }
-    Mod+Tab hotkey-overlay-title="Run an Application" { spawn "qs" "-p" "/home/alisoneq/.config/quickshell/island/src" "ipc" "call" "launcher" "toggle"; }
-    Mod+Space repeat=false hotkey-overlay-title="Toggle Control Center" { spawn "qs" "-p" "/home/alisoneq/.config/quickshell/island/src" "ipc" "call" "control-center" "toggle"; }
-    Mod+V hotkey-overlay-title="Search Clipboard History" { spawn "qs" "-p" "/home/alisoneq/.config/quickshell/island/src" "ipc" "call" "launcher" "clipboardToggle"; }
-    Mod+N hotkey-overlay-title="Notification History" { spawn "qs" "-p" "/home/alisoneq/.config/quickshell/island/src" "ipc" "call" "notifications" "history"; }
+    Mod+Tab hotkey-overlay-title="Run an Application" { spawn "sh" "/etc/nixos/niri/island.sh" "ipc" "call" "launcher" "toggle"; }
+    Mod+Space repeat=false hotkey-overlay-title="Toggle Control Center" { spawn "sh" "/etc/nixos/niri/island.sh" "ipc" "call" "control-center" "toggle"; }
+    Mod+V hotkey-overlay-title="Search Clipboard History" { spawn "sh" "/etc/nixos/niri/island.sh" "ipc" "call" "launcher" "clipboardToggle"; }
+    Mod+N hotkey-overlay-title="Notification History" { spawn "sh" "/etc/nixos/niri/island.sh" "ipc" "call" "notifications" "history"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
     Mod+E hotkey-overlay-title="Run an Application: yazi" { spawn "kitty" "-e" "yazi"; }
     Mod+W hotkey-overlay-title="Run an Application: zen-beta" { spawn "zen-beta"; }
@@ -392,10 +392,10 @@ binds {
     // The allow-when-locked=true property makes them work even when the session is locked.
     // Using spawn-sh allows to pass multiple arguments together with the command.
     // "-l 1.0" limits the volume to 100%.
-    XF86AudioRaiseVolume allow-when-locked=true { spawn "qs" "-p" "/home/alisoneq/.config/quickshell/island/src" "ipc" "call" "audio" "volumeUp"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn "qs" "-p" "/home/alisoneq/.config/quickshell/island/src" "ipc" "call" "audio" "volumeDown"; }
-    XF86AudioMute        allow-when-locked=true { spawn "qs" "-p" "/home/alisoneq/.config/quickshell/island/src" "ipc" "call" "audio" "toggleMute"; }
-    XF86AudioMicMute     allow-when-locked=true { spawn "qs" "-p" "/home/alisoneq/.config/quickshell/island/src" "ipc" "call" "audio" "micMute"; }
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "sh" "/etc/nixos/niri/island.sh" "ipc" "call" "audio" "volumeUp"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "sh" "/etc/nixos/niri/island.sh" "ipc" "call" "audio" "volumeDown"; }
+    XF86AudioMute        allow-when-locked=true { spawn "sh" "/etc/nixos/niri/island.sh" "ipc" "call" "audio" "toggleMute"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn "sh" "/etc/nixos/niri/island.sh" "ipc" "call" "audio" "micMute"; }
 
     // Example media keys mapping using playerctl.
     // This will work with any MPRIS-enabled media player.

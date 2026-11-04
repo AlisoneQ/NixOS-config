@@ -36,6 +36,7 @@
 							useUserPackages = true;
 							extraSpecialArgs = {
 								inherit inputs;
+								isLaptop = false;
 							};
 							users.alisoneq = import ./home.nix;
 							backupFileExtension = "backup";
@@ -60,6 +61,7 @@
 							useUserPackages = true;
 							extraSpecialArgs = {
 								inherit inputs;
+								isLaptop = true;
 							};
 							users.alisoneq = import ./home.nix;
 							backupFileExtension = "backup";
